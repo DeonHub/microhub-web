@@ -1,0 +1,259 @@
+@media screen and (max-width:1199px) {
+    .banner_content h3 {
+        font-size: 35px;
+    }
+}
+
+
+
+
+@media screen and (max-width:991px) {
+    .banner_content h3 {
+        font-size: 33px;
+    }
+
+    .header_section {
+        padding: 10px 0px;
+    }
+
+    .header_section .nav-link {
+        color: var(--bg-black);
+        padding: 14px 17px !important;
+        font-size: 13px;
+        font-family: 'Raleway', sans-serif;
+        display: block;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol:before {
+        background: var(--bg-primary-hover);
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 100%;
+        position: absolute;
+        top: -4px !important;
+        left: -4px !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol:after {
+        background: var(--bg-primary-hover);
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 100%;
+        position: absolute;
+        top: inherit !important;
+        left: -4px;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline {
+        margin: 57px 0 !important;
+        border-left: 2px solid var(--bg-primary-hover);
+        padding-left: 0 !important;
+        padding-top: 120px !important;
+        border-top: 0 !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li {
+        height: 220px;
+        float: none !important;
+        width: inherit !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li:nth-child(2) .img-handler-bot img {
+        width: 70px;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li:last-child {
+        margin: 0;
+        bottom: 0 !important;
+        height: 120px;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li:last-child .img-handler-bot {
+        bottom: 40px !important;
+        width: 40% !important;
+        margin-left: 25px !important;
+        margin-top: 0 !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li:last-child .img-handler-bot img {
+        width: 100%;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li:last-child .ps-top {
+        margin-bottom: 0 !important;
+        top: 20px;
+        width: 50% !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li span {
+        left: 0 !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li span.ps-sp-top:before {
+        content: none !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li span.ps-sp-top:after {
+        content: none !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li span.ps-sp-bot:before {
+        content: none !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li span.ps-sp-bot:after {
+        content: none !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li .img-handler-top {
+        position: absolute !important;
+        bottom: 150px !important;
+        width: 30% !important;
+        float: left !important;
+        margin-left: 35px !important;
+        margin-bottom: 0 !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li .img-handler-top img {
+        margin: 0 auto !important;
+        width: 80% !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li .img-handler-bot {
+        position: absolute !important;
+        bottom: 115px !important;
+        width: 30% !important;
+        float: left !important;
+        margin-left: 35px !important;
+        margin-bottom: 0 !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li p {
+        text-align: justify !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        margin-top: 0px !important;
+
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li .ps-top {
+        width: 93% !important;
+        right: 0;
+        top: -40px;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li .ps-bot {
+        width: 93% !important;
+        right: 0;
+        top: -79px;
+    }
+
+    .blog_img {
+        margin-bottom: 20px;
+    }
+
+    .request_form_wrap .setp {
+        margin: 0 auto;
+        margin-bottom: 20px;
+    }
+
+
+}
+
+@media screen and (min-width:768px) {
+    .request_btn .btn {
+        width: 257px !important;
+        padding: 18px 10px;
+    }
+}
+
+@media screen and (max-width:767px) {
+    .banner_section {
+        padding-top: 120px !important;
+    }
+
+    .banner_content {
+        text-align: center;
+    }
+
+    .banner_content span {
+        display: block;
+    }
+
+    .banner_content h3 {
+        font-size: 41px;
+        line-height: 51px;
+    }
+
+    .breadcrumb_nav h2 {
+        font-size: 29px;
+
+    }
+}
+
+@media screen and (max-width:575px) {
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline {
+        margin-left: 24px !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol:before,
+    .about_timeline .ps-timeline-sec .timeline_wrap ol:after {
+        left: 20px !important;
+    }
+
+    .about_timeline .ps-timeline-sec .timeline_wrap ol.ps-timeline li span {
+        width: 40px;
+        height: 40px;
+        margin-left: -21px;
+        border: 2px solid var(--bg-primary-hover);
+        font-size: 20px;
+        line-height: 32px;
+    }
+
+    .sticky_section:before,
+    .sticky_section:after {
+        display: none;
+    }
+
+    .sticky_section {
+        padding: 11px 20px;
+    }
+}
+
+@media screen and (max-width:500px) {
+    .franchise_tab .nav-item {
+        display: inline-block !important;
+        justify-content: space-between !important;
+        width: 50%;
+    }
+
+    .franchise_tab .nav-pills .nav-link {
+        margin-bottom: 0;
+    }
+}
+
+@media screen and (max-width:450px) {
+    .banner_content h3 {
+        font-size: 31px;
+        line-height: 38px;
+    }
+
+    .breadcrumb_nav h2 {
+        font-size: 23px;
+    }
+
+    .franchise_details .nav-item {
+        width: 50% !important;
+    }
+}
+
+@media screen and (max-width:350px) {
+    .banner_content h3 {
+        font-size: 27px;
+        line-height: 35px;
+    }
+}

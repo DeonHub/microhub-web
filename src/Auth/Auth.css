@@ -1,0 +1,40 @@
+.signin_form {
+    background: #fff !important;
+    border: 1px solid #DDD;
+    position: absolute;
+    /* top: 50%; 
+    left: 50%;
+    transform: translate(-50%, -50%); */
+    width: 100%;
+    max-width: 450px;
+    margin-top: 5%;
+}
+
+.btn-primary {
+    height: 49px;
+    border-radius: 2px;
+    font-size: 16px;
+    font-family: 'Raleway', sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.form-label {
+    font-size: 13px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+}
+
+.form-control {
+    height: 50px;
+    border: 1px solid #EEE;
+    font-size: 14px;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 500;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.form-control::placeholder {
+    color: #BBB;
+}
