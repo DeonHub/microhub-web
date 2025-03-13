@@ -62,8 +62,8 @@ const AdminSidebar = ({ active }) => {
             </li>
 
             <li className="nav-item">
-              <a href="/admin/bookings" className={`nav-link ${
-                    active === "booking" ? "active" : ""
+              <a href="/admin/reports" className={`nav-link ${
+                    active === "report" ? "active" : ""
                   }`} >
                 <i className="nav-icon fa fa-address-book"></i>
                 Reports

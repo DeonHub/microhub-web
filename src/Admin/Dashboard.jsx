@@ -17,7 +17,7 @@ const Dashboard = () =>{
   const [totalOfficers, setTotalOfficers] = useState(0);
 
   useEffect(() => {
-    document.title = "Dashboard | Special Ride";
+    document.title = "Dashboard | MicroHub";
 
     setIsLoading(true);
 

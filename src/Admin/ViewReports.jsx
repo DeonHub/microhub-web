@@ -4,11 +4,11 @@ import "./Admin.css";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminHeader from "./components/AdminHeader";
 import AdminFooter from "./components/AdminFooter";
-import TransactionModal from "./TransactionModal";
+import ReportModal from "./ReportModal";
 // import axios from "axios";
 import { Spin } from "antd";
 
-const ViewTransactions = () => {
+const ViewReports = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -17,7 +17,7 @@ const ViewTransactions = () => {
 
 
     const data = [{
-        transactionId: "66682afd028ee",
+        reportId: "66682afd028ee",
         paymentBy: "Shyamoli Dean",
         receiveBy: "Abdul Karim",
         paymentMethod: "Cash Payment",
@@ -27,7 +27,7 @@ const ViewTransactions = () => {
     }]
 
   useEffect(() => {
-    document.title = "View Transactions | MicroHub";
+    document.title = "View Reports | MicroHub";
     setIsLoading(true);
 
     const token = window.sessionStorage.getItem("token");
@@ -73,7 +73,7 @@ const ViewTransactions = () => {
       <div className="wrapper">
         <AdminHeader />
 
-        <AdminSidebar active={"transaction"} />
+        <AdminSidebar active={"report"} />
 {isLoading ? (
           <Spin fullscreen={true} size={"large"} />
         ) : (
@@ -83,12 +83,12 @@ const ViewTransactions = () => {
             <div className="container-fluid">
                 <div className="row mb-2">
                     <div className="col-sm-6">
-                        <h1 className="m-0">Transactions</h1>
+                        <h1 className="m-0">Reports</h1>
                     </div>
                     <div className="col-sm-6">
                         <ol className="breadcrumb float-sm-right">
                             <li className="breadcrumb-item"><a href="/">Dashboard</a></li>
-                            <li className="breadcrumb-item active">Transactions</li>
+                            <li className="breadcrumb-item active">Reports</li>
                         </ol>
                     </div>
                 </div>
@@ -105,7 +105,7 @@ const ViewTransactions = () => {
                             <div className="card-header">
                                 <div className="row align-items-center">
                                     <div className="col-12 d-flex justify-content-between">
-                                        <h3 className="card-title">Manage Transactions </h3>
+                                        <h3 className="card-title">Manage Reports </h3>
                                     </div>
                                 </div>
                             </div>
@@ -150,7 +150,7 @@ const ViewTransactions = () => {
                                         <tr className="text-center">
                                             <th >#</th>
                                             <th >Date</th>
-                                            <th >Transaction ID</th>
+                                            <th >Report ID</th>
                                             <th >Order ID</th>
                                             <th >Payment By</th>
                                             <th >Type</th>
@@ -182,10 +182,10 @@ const ViewTransactions = () => {
                                             <td className="">1.00 INR</td>
                                             <td>India</td>
                                             <td>
-                                            <TransactionModal title={"View"} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} mode={"view"} data={data} buttonText={"View"} />
+                                            <ReportModal title={"View"} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} mode={"view"} data={data} buttonText={"View"} />
                                             </td>
                                             <td>
-                                            <TransactionModal title={"Update"} claxx={"btn btn-sm btn-warning mr-3"} icon={"nav-icon fa fa-edit mr-2"} mode={"edit"} data={data} buttonText={"Update"} />
+                                            <ReportModal title={"Update"} claxx={"btn btn-sm btn-warning mr-3"} icon={"nav-icon fa fa-edit mr-2"} mode={"edit"} data={data} buttonText={"Update"} />
                                             </td>
                                         </tr>
                                          ))
@@ -270,4 +270,4 @@ const ViewTransactions = () => {
   );
 };
 
-export default ViewTransactions;
+export default ViewReports;

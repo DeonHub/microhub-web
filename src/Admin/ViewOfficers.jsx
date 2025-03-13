@@ -24,7 +24,7 @@ const ViewOfficers = () => {
 
 
   useEffect(() => {
-    document.title = "View Officers | Special Ride";
+    document.title = "View Officers | MicroHub";
 
     setIsLoading(true);
 

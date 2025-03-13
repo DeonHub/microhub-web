@@ -20,37 +20,39 @@ const ViewFaqs = () =>{
 
 
     useEffect(() => {
-        document.title = "View FAQs | Special Ride";
+        document.title = "View Activity Log | MicroHub";
         setIsLoading(true);
         const token = window.sessionStorage.getItem("token");
 
-        if (!token) {
-            navigate("/");
-            return;
-          }
+        // if (!token) {
+        //     navigate("/");
+        //     return;
+        //   }
 
         const headers = {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         };
 
-        axios.get(`${process.env.REACT_APP_API_URL}/faqs`, { headers })
-        .then((response) => {
-            // console.log(response.data.data);
-            const sortedFaqs = response.data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            setFaqs(sortedFaqs);
-            setIsLoading(false);
-        })
-        .catch((error) => {
-        //   openNotification(
-        //     "topRight",
-        //     "error",
-        //     "Error",
-        //     "An error occurred while creating the faq. Please try again."
-        //   );
-          console.error(error);
-          setIsLoading(false);
-        })
+        setIsLoading(false)
+
+        // axios.get(`${process.env.REACT_APP_API_URL}/faqs`, { headers })
+        // .then((response) => {
+        //     // console.log(response.data.data);
+        //     const sortedFaqs = response.data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        //     setFaqs(sortedFaqs);
+        //     setIsLoading(false);
+        // })
+        // .catch((error) => {
+        // //   openNotification(
+        // //     "topRight",
+        // //     "error",
+        // //     "Error",
+        // //     "An error occurred while creating the faq. Please try again."
+        // //   );
+        //   console.error(error);
+        //   setIsLoading(false);
+        // })
 
     },[navigate])
 
@@ -110,12 +112,12 @@ const ViewFaqs = () =>{
                                 <div className="container-fluid">
                                     <div className="row mb-2">
                                         <div className="col-sm-6">
-                                            <h1 className="m-0">FAQ List</h1>
+                                            <h1 className="m-0">Activity Log</h1>
                                         </div>
                                         <div className="col-sm-6">
                                             <ol className="breadcrumb float-sm-right">
                                                 <li className="breadcrumb-item"><a href="/">Dashboard</a></li>
-                                                <li className="breadcrumb-item active">FAQ List</li>
+                                                <li className="breadcrumb-item active">Activity Log</li>
                                             </ol>
                                         </div>
                                     </div>
@@ -130,12 +132,11 @@ const ViewFaqs = () =>{
                                                 <div className="card-header">
                                                     <div className="row align-items-center">
                                                         <div className="col-6">
-                                                            <h3 className="card-title">Manage Faq </h3>
+                                                            <h3 className="card-title">Manage Activity Logs </h3>
                                                         </div>
                                                         <div className="col-6">
                                                             <div className="float-right">
-                                                                <FaqModal title={"Create"} claxx={"btn btn-success btn-sm"} icon={"nav-icon fa fa-plus mr-2"} mode={"create"} buttonText={"Add New"}/>
-                                                                {/* <input type="text" className="form-control-sm" /> */}
+                                                                {/* <FaqModal title={"Create"} claxx={"btn btn-success btn-sm"} icon={"nav-icon fa fa-plus mr-2"} mode={"create"} buttonText={"Add New"}/> */}
                                                             </div>
                     
                                                         </div>

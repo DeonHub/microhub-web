@@ -18,6 +18,7 @@ import ViewCountries from './Admin/ViewCountries';
 import ViewProfile from './Admin/ViewProfile';
 import CreateRole from './Admin/CreateRole';
 import EditRole from './Admin/EditRole';
+import ViewReports from './Admin/ViewReports';
 
 const App = () => {
 
@@ -36,6 +37,7 @@ const App = () => {
         {/* Loans */}
         <Route path={`/admin/loans`} element={<ViewLoans />} />
         <Route path={`/admin/transactions`} element={<ViewTransactions />} />
+        <Route path={`/admin/reports`} element={<ViewReports />} />
         <Route path={`/admin/categories`} element={<ViewCategories />} />
 
         <Route path={`/admin/subcategories`} element={<ViewSubcategories />} />

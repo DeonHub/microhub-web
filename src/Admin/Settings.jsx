@@ -16,7 +16,7 @@ const Settings = () => {
     const [settings, setSettings] = useState(false);
     const [formState, setFormState] = useState({
         siteLogo: "",
-        adminLogo: "Special Ride",
+        adminLogo: "MicroHub",
         seoImage: "",
         favicon: "",
         appName: "",

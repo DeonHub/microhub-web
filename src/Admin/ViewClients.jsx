@@ -24,7 +24,7 @@ const ViewClients = () => {
 
 
   useEffect(() => {
-    document.title = "View Clients | Special Ride";
+    document.title = "View Clients | MicroHub";
 
     setIsLoading(true);
 

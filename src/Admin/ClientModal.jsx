@@ -43,6 +43,9 @@ const ClientModal = ({
     status: "active",
     assignedOfficer: ""
   });
+  // const [officers, setOfficers] = useState(0);
+  // const officersData = localStorage.getItem("officersData");
+  // setOfficers(officersData ? JSON.parse(localStorage.getItem("officersData")) : []);
 
   
 
@@ -120,7 +123,7 @@ const ClientModal = ({
   
       const newClient = {
         ...formState,
-        assignedOfficer: officers[formState.assignedOfficer],
+        // assignedOfficer: officers[formState.assignedOfficer],
         monthlyIncome: monthlyIncome[formState.monthlyIncome],
         userId: "USR" + Math.floor(Math.random() * 1000000),
         status: "active",
@@ -695,13 +698,13 @@ const ClientModal = ({
                             required
                           >
                             <option value="">Select assigned officer</option>
-                            {Object.entries(officers).map(([key, value]) => (
+                            {officers.map((officer) => (
                               <option
-                                key={key}
-                                value={value}
-                                selected={value === formState.assignedOfficer}
+                                key={officer.id}
+                                value={officer.fullname}
+                                selected={officer.fullname === formState.assignedOfficer}
                               >
-                                {value}
+                                {officer.fullname}
                               </option>
                               ))}
                            

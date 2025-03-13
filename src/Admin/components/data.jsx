@@ -5,12 +5,47 @@ export const maritalStatus = {
     widowed: "Widowed"
   }
 
-export const officers = {
-    John12345: "John Doe",
-    Jane12345: "Jane Doe",
-    Samuel12345: "Samuel Doe",
-    Sarah12345: "Sarah Doe"
-  }
+export const officers = [{
+	id: 1,
+	userId: "OFS12345",
+	fullname: "John Doe",
+	email: "",
+	phone: "",
+	role: "Admin",
+	createdAt: "2021-07-01",
+	updatedAt: "2021-07-01"
+},
+{
+	id: 2,
+	userId: "OFS12346",
+	fullname: "Jane Doe",
+	email: "",
+	phone: "",
+	role: "Officer",
+	createdAt: "2021-07-01",
+	updatedAt: "2021-07-01"
+},
+{
+	id: 3,
+	userId: "OFS12347",
+	fullname: "James Doe",
+	email: "",
+	phone: "",
+	role: "Officer",
+	createdAt: "2021-07-01",
+	updatedAt: "2021-07-01"
+},
+{
+	id: 4,
+	userId: "OFS12348",
+	fullname: "Jenny Doe",
+	email: "",
+	phone: "",
+	role: "Officer",
+	createdAt: "2021-07-01",
+	updatedAt: "2021-07-01"
+}
+]
 
 export const employmentStatus = {
 	employed: "Employed",
