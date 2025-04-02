@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Admin.css";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminHeader from "./components/AdminHeader";
 import AdminFooter from "./components/AdminFooter";
-import ReportModal from "./ReportModal";
+import TicketModal from "./TicketModal";
 import axios from "axios";
 import { Spin } from "antd";
 
-const ViewReports = () => {
+
+const OfficerTickets = () => {
   const navigate = useNavigate();
   const [results, setResults] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -18,9 +19,11 @@ const ViewReports = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [count, setCount] = useState(0);
+  const [userId, setUserId] = useState(window.sessionStorage.getItem("userId"))
 
   useEffect(() => {
-    document.title = "View Reports | MicroHub";
+    document.title = "View Tickets | MicroHub";
+
     setIsLoading(true);
 
     const token = window.sessionStorage.getItem("token");
@@ -36,10 +39,10 @@ const ViewReports = () => {
     };
 
     axios
-      .get(`${import.meta.env.VITE_API_URL}/reports`, { headers })
+      .get(`${import.meta.env.VITE_API_URL}/tickets/officer/${userId}`, { headers })
       .then((response) => {
         // console.log(response.data);
-        const sortedOfficers = response.data.reports.sort(
+        const sortedOfficers = response.data.tickets.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
         setResults(sortedOfficers);
@@ -50,7 +53,10 @@ const ViewReports = () => {
         console.error(error);
         setIsLoading(false);
       });
+
   }, [navigate]);
+
+
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -59,16 +65,7 @@ const ViewReports = () => {
 
   const filteredData = results.filter(
     (result) =>
-      result.reportId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      result?.submittedBy?.userId?.firstname
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      result?.submittedBy?.userId?.surname
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      result?.submittedBy?.officerId
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+      result.ticketId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Calculate pagination
@@ -113,58 +110,61 @@ const ViewReports = () => {
     return `${hours}:${minutes} ${amPM}`;
   };
 
+
+
   return (
     <div className="hold-transition sidebar-mini">
       <div className="wrapper">
         <AdminHeader />
 
-        <AdminSidebar active={"report"} />
-        {isLoading ? (
+        <AdminSidebar active={"ticket"} />
+
+{isLoading ? (
           <Spin fullscreen={true} size={"large"} />
         ) : (
           <>
-            <div className="content-wrapper">
-              <div className="content-header">
-                <div className="container-fluid">
-                  <div className="row mb-2">
-                    <div className="col-sm-4">
-                      <h1 className="m-0">Reports</h1>
+        <div className="content-wrapper">
+          <div className="content-header">
+            <div className="container-fluid">
+              <div className="row mb-2">
+                <div className="col-sm-4">
+                  <h1 className="m-0">Support Tickets</h1>
+                </div>
+                <div className="col-sm-4">
+                      <h5 className="p-0 m-auto">Total Tickets: {count} </h5>
                     </div>
-                    <div className="col-sm-4">
-                      <h5 className="p-0 m-auto">Total Reports: {count} </h5>
-                    </div>
-                    <div className="col-sm-4">
-                      <ol className="breadcrumb float-sm-right">
-                        <li className="breadcrumb-item">
-                          <a href="/">Dashboard</a>
-                        </li>
-                        <li className="breadcrumb-item active">Reports</li>
-                      </ol>
-                    </div>
-                  </div>
+                <div className="col-sm-4">
+                  <ol className="breadcrumb float-sm-right">
+                    <li className="breadcrumb-item">
+                      <a href="/">Dashboard</a>
+                    </li>
+                    <li className="breadcrumb-item active">Support Tickets</li>
+                  </ol>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div className="content">
-                <div className="container-fluid">
-                  <div className="row">
-                    <div className="col-12">
-                      <div className="card">
-                        <div className="card-header">
+          <div className="content">
+            <div className="container-fluid">
+              <div className="row">
+                <div className="col-12">
+                  <div className="card">
+                  <div className="card-header">
                           <div className="row align-items-center">
                             <div className="col-6 d-flex justify-content-between">
-                              <h3 className="card-title">Manage Reports </h3>
+                              <h3 className="card-title">Manage Support Tickets </h3>
                             </div>
                             <div className="col-6">
                               <div className="float-right">
-                                {/* <ReportModal
+                                <TicketModal
                                   title={"Add New"}
                                   claxx={"btn btn-success btn-sm"}
                                   icon={"nav-icon fa fa-plus mr-2"}
                                   mode={"create"}
                                   buttonText={"Add New"}
                                   setIsLoading={setIsLoading}
-                                /> */}
+                                />
                               </div>
                             </div>
                           </div>
@@ -204,22 +204,24 @@ const ViewReports = () => {
                           </div>
                         </div>
 
-                        <div className="card-body table-responsive p-0">
-                          <table
-                            id="dataTables"
-                            className="table table-hover text-nowrap jsgrid-table"
-                          >
-                            <thead>
-                              <tr className="text-center">
-                                <th>Report ID</th>
-                                <th>Submitted By</th>
-                                <th>Report Type</th>
-                                <th>Submitted On</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                              </tr>
-                            </thead>
-                            <tbody>
+
+                    <div className="card-body table-responsive p-0">
+                      <table
+                        id="dataTables"
+                        className="table table-hover text-nowrap jsgrid-table"
+                      >
+                        <thead>
+                          <tr>
+                            <th>Ticket ID</th>
+                            {/* <th>Submitted By</th> */}
+                            <th>Category</th>
+                            <th>Submitted On</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
                               {/* <input type="hidden" value={currentPageData} /> */}
                               {currentPageData.length === 0 ? (
                                 <tr colspan="10" className="text-center">
@@ -229,21 +231,20 @@ const ViewReports = () => {
                                 </tr>
                               ) : (
                                 currentPageData.map((result, index) => (
-                                  <tr className="text-center" key={index}>
-                                    <td>{result.reportId}</td>
-                                    <td>
+                                  <tr className="" key={index}>
+                                    <td>{result.ticketId}</td>
+                                    {/* <td>
                                       <div>
-                                        {result?.submittedBy?.userId?.firstname}{" "}
-                                        {result?.submittedBy?.userId?.surname}
+                                        {result?.officerId?.userId?.firstname}{" "}
+                                        {result?.officerId?.userId?.surname}
                                       </div>
                                       <div>
-                                        {result?.submittedBy?.officerId}
+                                        {result?.officerId?.officerId}
                                       </div>
-                                    </td>
+                                    </td> */}
 
                                     <td>
-                                      {capitalizeFirstLetter(result.reportType)}{" "}
-                                      Report
+                                      {capitalizeFirstLetter(result.category)}
                                     </td>
                                     <td>
                                       <div>{formatDate(result?.createdAt)}</div>
@@ -251,8 +252,16 @@ const ViewReports = () => {
                                     </td>
                                     <td>
                                       <span
+                                        className={`badge badge-success`}
+                                      >
+                                        High
+                                      </span>
+                                    </td>
+
+                                    <td>
+                                      <span
                                         className={`badge ${
-                                          result?.status === "approved"
+                                          result?.status === "open"
                                             ? "badge-success"
                                             : result?.status === "pending"
                                             ? "badge-warning"
@@ -264,7 +273,7 @@ const ViewReports = () => {
                                     </td>
                                    
                                     <td>
-                                      <ReportModal
+                                      <TicketModal
                                         title={"View"}
                                         claxx={"btn btn-sm btn-info mr-3"}
                                         icon={"nav-icon fa fa-eye mr-2"}
@@ -277,24 +286,19 @@ const ViewReports = () => {
                                         setIsLoading={setIsLoading}
                                       />
                                     </td>
-                                    {/* <td>
-                                      <ReportModal
-                                        title={"Update"}
-                                        claxx={"btn btn-sm btn-warning mr-3"}
-                                        icon={"nav-icon fa fa-edit mr-2"}
-                                        mode={"update"}
-                                        data={result}
-                                        buttonText={"Update"}
-                                      />
-                                    </td> */}
+                                    <td>
+                                    <TicketModal title={"Reply"} claxx={"btn btn-sm btn-success mr-3"} icon={"nav-icon fa fa-edit mr-2"} mode={"reply"} data={result} buttonText={"Reply"} setIsLoading={setIsLoading} disabled={result?.status === 'closed' || result?.status === 'resolved'} />
+                                    </td>
                                   </tr>
                                 ))
                               )}
                             </tbody>
-                          </table>
-                        </div>
 
-                        <div className="px-3 mt-2 row">
+                      </table>
+                    </div>
+
+
+                    <div className="px-3 mt-2 row">
                           <div className="col-6">
                             <p>
                               {`Showing ${
@@ -355,19 +359,20 @@ const ViewReports = () => {
                             </nav>
                           </div>
                         </div>
-                      </div>
-                    </div>
+
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <AdminFooter />
-          </>
+        <AdminFooter />
+           </>
         )}
       </div>
     </div>
   );
 };
 
-export default ViewReports;
+export default OfficerTickets;

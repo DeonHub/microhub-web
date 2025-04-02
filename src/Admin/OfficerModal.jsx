@@ -3,7 +3,8 @@ import { Modal } from "antd";
 import FileUpload from "./components/FileUpload";
 import axios from "axios";
 import openNotification from "../components/OpenNotification";
-import { countries, maritalStatus, officers, employmentStatus, monthlyIncome, otherIncome } from "./components/data";
+import { countries, maritalStatus } from "./components/data";
+import { Form } from "react-router-dom";
 
 const OfficerModal = ({
   data,
@@ -17,12 +18,12 @@ const OfficerModal = ({
   capitalizeFirstLetter
 }) => {
   const [open, setOpen] = useState(false);
+
   const [formState, setFormState] = useState({
-    role: "officer",
     firstname: "",
-    lastname: "",
+    surname: "",
     email: "",
-    phoneNumber: "",
+    contact: "",
     dateOfBirth: "",
     gender: "",
     residentialAddress: "",
@@ -35,30 +36,32 @@ const OfficerModal = ({
     idNumber: "",
     profilePicture: "",
     idFront: "",
-    idBack: "",
-    status: "active"
+    idBack: ""
   });
 
   
 
   const showModal = () => {
-
-    if (data) {
+    if (data) {                 
       // console.log(data)
-
-      const { profilePicture, idFront, idBack,...rest } = data;
+ 
+      const { firstname, surname, nationality, contact, profilePicture, ...rext } = data?.userId
+      const {userId, ...rest } = data;
       
-      setFormState((prevState) => ({
-        ...prevState,
-        profilePicture,
-        idFront,
-        idBack,
-        ...rest
+      setFormState(prev => ({
+        ...prev,
+        ...rest,
+        ...rext,
+        firstname,
+        surname,
+        nationality,
+        contact: contact || prev.contact,
+        profilePicture: profilePicture || prev.profilePicture
       }));
-
-      // console.log(formState)
     }
     setOpen(true);
+
+    // console.log(formState)
   };
 
   const handleOk = () => {
@@ -85,15 +88,76 @@ const OfficerModal = ({
   const handleSubmit = async () => {
 
     const token = window.sessionStorage.getItem("token");
-    // const headers = {
-    //   Authorization: `Bearer ${token}`,
-    //   "Content-Type": "multipart/form-data",
-    // };
-  
 
-    setIsLoading(true);
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    };
   
+    setIsLoading(true);
+
     if (mode === "create") {
+      const nonRequiredFields = ["emergencyContact"];
+
+      if (
+        Object.entries(formState).some(
+          ([key, value]) => 
+            !nonRequiredFields.includes(key) &&
+            !value?.toString().trim()
+        )
+      ) {
+        openNotification(
+          "topRight",
+          "error",
+          "Error",
+           "Please fill in all required fields"
+        );
+        setIsLoading(false); 
+        return;
+      }
+
+
+      const body = new FormData();
+      for (const key in formState) {
+        body.append(key, formState[key]);
+      }
+
+
+      // console.log(body);
+
+
+      axios.post(`${import.meta.env.VITE_API_URL}/officers`, body, { headers })
+      .then((response) => {
+        if (response.data.success) {
+          setIsLoading(false);
+
+          openNotification(
+            "topRight",
+            "success",
+            "Success",
+            "Officer has been saved successfully."
+          );
+
+          setTimeout(() => {
+              window.location.reload();
+          }, 1000)
+      
+        }
+      })
+      .catch((error) => {
+        openNotification(
+          "topRight",
+          "error",
+          "Error",
+          error.response.data.message
+        );
+        setIsLoading(false);
+      });
+
+  
+    } else {
+      // Update officer logic
+
       // if (Object.values(formState).some((value) => !value)) {
       //   openNotification(
       //     "topRight",
@@ -105,74 +169,42 @@ const OfficerModal = ({
       //   return;
       // }
 
-      // console.log(formState);
 
-
-  
-      const newOfficer = {
-        ...formState,
-        userId: "OFS" + Math.floor(Math.random() * 1000000),
-        status: "active",
-        createdAt: new Date().toISOString(),
-      };
-  
-      // Retrieve existing officers from localStorage
-      const officersData = JSON.parse(localStorage.getItem("officersData")) || [];
-  
-      // Add new officer to array
-      officersData.push(newOfficer);
-  
-      // Save updated officers array back to localStorage
-      localStorage.setItem("officersData", JSON.stringify(officersData));
-      setIsLoading(false);
-  
-      openNotification(
-        "topRight",
-        "success",
-        "Success",
-        "Officer has been saved successfully."
-      );
-      window.location.reload();
-  
-    } else {
-      // Update officer logic
-      const officersData = JSON.parse(localStorage.getItem("officersData")) || [];
-      
-      const officerIndex = officersData.findIndex((officer) => officer.userId === formState.userId);
-  
-      if (officerIndex > -1) {
-        officersData[officerIndex] = {
-          ...officersData[officerIndex],
-          ...formState,
-          updatedAt: new Date().toISOString(),
-        };
-  
-        localStorage.setItem("officersData", JSON.stringify(officersData));
-  
-        openNotification(
-          "topRight",
-          "success",
-          "Officer updated successfully",
-          "Officer details have been updated successfully."
-        );
-  
-        setIsLoading(false);
-
-        window.location.reload();
-
-        
-
-      } else {
-        openNotification(
-          "topRight",
-          "error",
-          "Error",
-          "Officer not found for update."
-        );
-        setIsLoading(false);
+      const body = new FormData();
+      for (const key in formState) {
+        body.append(key, formState[key]);
       }
+
+      axios.patch(`${import.meta.env.VITE_API_URL}/officers/${data?._id}`, body, { headers })
+      .then((response) => {
+        // console.log(response);
+
+        if (response.data.success) {
+          setIsLoading(false);
+          openNotification(
+            "topRight",
+            "success",
+            "Officer updated successfully",
+            "Officer details have been updated successfully."
+          );
+          window.location.reload();
+
+        }})
+        .catch((error) => {
+          openNotification(
+            "topRight",
+            "error",
+            "Error",
+            "Error updating officer"
+          );
+
+          console.log("error >>", error)
+          setIsLoading(false);
+        });
+        
+      } 
     }
-  };
+
   
 
   return (
@@ -202,15 +234,19 @@ const OfficerModal = ({
           <div className="card card-widget widget-user shadow">
             <div className="widget-user-header bg-secondary">
               <h3 className="widget-user-username">
-                {data?.firstname} {data?.lastname}
+                {data?.userId?.firstname} {data?.userId?.surname}
               </h3>
-              <h5 className="widget-user-desc">{data?.email}</h5>
+              <h5 className="widget-user-desc">{data?.userId?.email}</h5>
             </div>
             <div className="-mt-10 text-center">
                   <img
                     className="rounded-circle elevation-3"
-                    src={`${data?.profilePicture}`}
-                    alt="Customer"
+                    src={
+                      data?.userId?.profilePicture
+                          ? data?.userId?.profilePicture
+                          : `https://ui-avatars.com/api/?name=${data?.userId?.firstname}+${data?.userId?.surname}&background=random&color=fff`
+                        } 
+                    alt="Officer"
                     style={{
                       width: "150px",
                       height: "150px",
@@ -223,31 +259,31 @@ const OfficerModal = ({
 
             <div className="card-footer">
               <div className="row">
-                <div className="col-sm-4 border-right">
+                <div className="col-sm-6 border-right">
                   <div className="description-block">
                     <h5 className="description-header">Status</h5>
                     <span className="description-text">
                       <span
                         className={`badge bg-${
-                          data.status === "active" ? "success" : "secondary"
+                          data.userId?.status === "active" ? "success" : "secondary"
                         }`}
                         style={{ minWidth: "65px" }}
                       >
-                        {data.status === "active" ? "Active" : "Inactive"}
+                        {data.userId?.status === "active" ? "Active" : "Inactive"}
                       </span>
                     </span>
                   </div>
                 </div>
-                <div className="col-sm-4 border-right">
+                {/* <div className="col-sm-4 border-right">
                   <div className="description-block">
                     <h5 className="description-header">Assigned Officer</h5>
                     <span className="description-text">{data?.assignedOfficer || "No assigned officer"}</span>
                   </div>
-                </div>
-                <div className="col-sm-4">
+                </div> */}
+                <div className="col-sm-6">
                   <div className="description-block">
                     <h5 className="description-header">Registered At</h5>
-                    <span className="description-text">{formatDate(data?.createdAt)}</span>
+                    <span className="description-text">{formatDate(data?.userId?.createdAt)}</span>
                   </div>
                 </div>
               </div>
@@ -265,15 +301,15 @@ const OfficerModal = ({
                     <div className="card-body">
                       <table className="table table-striped">
                         <tbody>
-                        <tr><th>Phone</th><td>{data?.phoneNumber}</td></tr>
-                        <tr><th>Date of Birth</th><td>{data?.dateOfBirth}</td></tr>
-                        <tr><th>Gender</th><td>{capitalizeFirstLetter(data?.gender)}</td></tr>
-                        <tr><th>Residential Address</th><td>{data?.residentialAddress}</td></tr>
-                        <tr><th>Postal Address</th><td>{data?.postalAddress}</td></tr>
-                        <tr><th>Town</th><td>{data?.town}</td></tr>
-                        <tr><th>Nationality</th><td>{data?.nationality}</td></tr>
-                        <tr><th>Marital Status</th><td>{capitalizeFirstLetter(data?.maritalStatus)}</td></tr>
-                        <tr><th>Emergency Contact</th><td>{data?.emergencyContact}</td></tr>
+                        <tr><th>Phone number</th><td>{data?.userId?.contact ? data?.userId?.contact : "Not set"}</td></tr>
+                        <tr><th>Date of Birth</th><td>{data?.userId?.dateOfBirth || "Not set"}</td></tr>
+                        <tr><th>Gender</th><td>{capitalizeFirstLetter(data?.userId?.gender) || "Not set"}</td></tr>
+                        <tr><th>Residential Address</th><td>{data?.residentialAddress || "Not set"}</td></tr>
+                        <tr><th>Postal Address</th><td>{data?.postalAddress || "Not set"}</td></tr>
+                        <tr><th>Town</th><td>{data?.town || "Not set"}</td></tr>
+                        <tr><th>Nationality</th><td>{data?.userId?.nationality || "Not set"}</td></tr>
+                        <tr><th>Marital Status</th><td>{capitalizeFirstLetter(data?.maritalStatus) || "Not set"}</td></tr>
+                        <tr><th>Emergency Contact</th><td>{data?.emergencyContact || "Not set"}</td></tr>
                         </tbody>
                       </table>
                     </div>
@@ -291,23 +327,14 @@ const OfficerModal = ({
                   <tr>
                     <th>ID Front</th>
                     <td>
-                        <img
-                          className="img-fluid elevation-2"
-                          width="150"
-                          src={data?.idFront || "default-id.png"}
-                          alt="ID Front"
-                        />
+                      <a href={data?.idFront} target="_blank">View ID Front</a>
+                        
                     </td>
                   </tr>
                   <tr>
                     <th>ID Back</th>
                     <td>
-                        <img
-                          className="img-fluid elevation-2"
-                          width="150"
-                          src={data?.idBack || "default-id.png"}
-                          alt="ID Back"
-                        />
+                    <a href={data?.idBack} target="_blank">View ID Back</a>
                     </td>
                   </tr>
                         </tbody>
@@ -351,17 +378,18 @@ const OfficerModal = ({
                         </label>
                         <input
                           className="form-control "
-                          name="lastname"
+                          name="surname"
                           onChange={handleInputChange}
                           type="text"
                           placeholder="Enter Last Name"
-                          value={formState.lastname}
+                          value={formState.surname}
                           required
                         />
                       </div>
                     </div>
 
-                    <div className="row mt-2">
+                    {mode === 'create' && (<>
+                      <div className="row mt-2">
                       <div className="col-md-6">
                         <label className="form-label required" for="password">
                           Email Address<span className="text-danger">*</span>
@@ -384,10 +412,11 @@ const OfficerModal = ({
                         </label>
                         <input
                           className="form-control"
-                          name="phoneNumber"
+                          name="contact"
                           onChange={handleInputChange}
                           type="tel"
-                          value={formState.phoneNumber}
+                          value={formState.contact}
+                          disabled={mode === "edit"}
                           placeholder="Enter Phone number"
                           required
                         />
@@ -402,6 +431,7 @@ const OfficerModal = ({
                             className="form-control"
                             name="gender"
                             onChange={handleInputChange}
+                            disabled={mode === "edit"}
                           >
                             <option value="">Select Gender</option>
 
@@ -430,11 +460,14 @@ const OfficerModal = ({
                             onChange={handleInputChange}
                             type="date"
                             placeholder="Enter address"
+                            disabled={mode === "edit"}
                             value={formState.dateOfBirth}
                           />
                         </div>
                       </div>
                     </div>
+                    </>)}
+                   
 
                     <div className="row mt-2">
                       <div className="col-md-6">
@@ -511,21 +544,6 @@ const OfficerModal = ({
 
                     <div className="row mt-2">
                     <div className="col-md-6">
-                        <label className="form-label required" for="last_name">
-                          Emergency Contact{" "}
-                          <span className="text-danger">*</span>
-                        </label>
-                        <input
-                          className="form-control "
-                          name="emergencyContact"
-                          onChange={handleInputChange}
-                          type="text"
-                          placeholder="Enter emergency contact"
-                          value={formState.emergencyContact}
-                          required
-                        />
-                      </div>
-                      <div className="col-md-6">
                         <div className="">
                           <label className="form-label">
                             Marital Status <span className="text-danger">*</span>
@@ -549,13 +567,27 @@ const OfficerModal = ({
                           </select>
                         </div>
                       </div>
+                    <div className="col-md-6">
+                        <label className="form-label required" for="last_name">
+                          Emergency Contact{" "}
+                        </label>
+                        <input
+                          className="form-control "
+                          name="emergencyContact"
+                          onChange={handleInputChange}
+                          type="text"
+                          placeholder="Enter emergency contact"
+                          value={formState.emergencyContact}
+                        />
+                      </div>
+                    
 
                       
                     </div>
                     </fieldset>
 
-
-                    <fieldset className="mt-5">
+{mode === 'create' && (<>
+  <fieldset className="mt-5">
                     <p className="bold text-dark text-lg">ID Card Upload</p>
 
                     <div className="row mt-2">
@@ -601,9 +633,11 @@ const OfficerModal = ({
                         id={"profilePicture"}
                         picture={data?.profilePicture}
                         name={"profilePicture"}
-                        label={"Profile Photo"}
+                        label={"Profile Picture"}
                         setFormState={setFormState}
                       />
+
+
                       <FileUpload
                         id={"idFront"}
                         picture={data?.idFront}
@@ -618,8 +652,11 @@ const OfficerModal = ({
                         label={"Back of ID Card"}
                         setFormState={setFormState}
                       />
+
                     </div>
                   </fieldset>
+</>)}
+                
 
                   <hr />
                 </div>

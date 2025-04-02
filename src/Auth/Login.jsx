@@ -29,62 +29,58 @@ const Login = () => {
 
      const body = { email, password };
 
-     if(email === "admin@microhub.com" && password === "qwertyuiop") {
-        setIsLoading(false);
-        openNotification("topRight", "success", "Success", "Login successful");
-        navigate("/admin/dashboard");
-        } else{
-            openNotification("topRight", "error", "Login Error", "Invalid email address or password");
+      axios
+        .post(`${import.meta.env.VITE_API_URL}/auth/login`, body, { headers: {
+          'Content-Type': 'application/json'
+        },})
+        .then((response) => {
+          if (response.data.success) {
+            // console.log("response.data :>> ", response.data);
+            window.sessionStorage.setItem("token", response.data.token);
+            window.sessionStorage.setItem("userId", response.data.user._id);
 
+            openNotification("topRight", "success", "Success", "Login Successful");
+            setEmail("");
+            setPassword("");
             setIsLoading(false);
-        }
 
+            setTimeout(() => {
+                if(response.data.user.role === "admin" || response.data.user.userType === "admin") {
+              navigate(`/admin/dashboard`);
+            } else {
+              navigate(`/officer/dashboard`);
+            }
+            }, 1000);
+          }
+        })
+        .catch((error) => {
+          openNotification("topRight", "error", "Login Error", "Invalid email address or password");
+          setEmail("");
+          setPassword("");
 
-    //   axios
-    //     .post(`${process.env.REACT_APP_API_URL}/auth/sign-in`, body, { headers: {
-    //       'Content-Type': 'application/json'
-    //     },})
-    //     .then((response) => {
-    //     //   if (response.data.success) {
-
-    //         window.sessionStorage.setItem("token", response.data.accessToken);
-    //         window.sessionStorage.setItem("refreshToken", response.data.refreshToken);
-
-    //         openNotification("topRight", "success", "Success", "Login Successful");
-    //         setEmail("");
-    //         setPassword("");
-    //         setIsLoading(false);
-
-    //         setTimeout(() => {
-    //           navigate(`/admin/dashboard`);
-    //         }, 1000);
-    //     //   }
-    //     })
-    //     .catch((error) => {
-    //       openNotification("topRight", "error", "Login Error", "Invalid email address or password");
-    //       setEmail("");
-    //       setPassword("");
-
-    //       console.log("error :>> ", error);
-    //       setIsLoading(false);
-    //     });
+          console.log("error :>> ", error);
+          setIsLoading(false);
+        });
 
     }
 
 
     return(
-
-        isLoading ? (<Spin fullscreen={true} size={'large'} />) : (
+<>
+        {isLoading && (<Spin fullscreen={true} size={'large'} />)}
             <div className="signin_sec bg-black">
             <div className="container">
                 <div className="row d-flex justify-content-center">
                     <div className="col-md-6 col-lg-5 col-xl-5">
                         <form method="POST" action="/login">
-                            <div className="signin_form p-5 bg-white">
-                                <div className="mb-5 text-center">
+                            <div className="signin_form p-4 bg-white">
+                                <div className="mb-3 text-center">
                                     <a href="/">
                                         <img src="/assets/logo.png" width="150" alt="logo" style={{ borderRadius: "100px"}} />
                                     </a>
+                                </div>
+                                <div className="">
+                                    <h2 className="text-center text-bold text-uppercase">Login</h2>
                                 </div>
                                 <div className="mb-3">
                                     <label for="email" className="form-label">Email Address</label>
@@ -111,8 +107,8 @@ const Login = () => {
             </div>
             
             </div>
-        )
-        
+      
+        </>
 
     );
 }

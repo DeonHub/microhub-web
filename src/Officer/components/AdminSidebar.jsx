@@ -4,7 +4,7 @@ import "../Admin.css";
 const AdminSidebar = ({ active }) => {
   return (
     <aside className="main-sidebar sidebar-dark-primary elevation-4">
-      <a className="brand-link text-center" href="/admin/dashboard">
+      <a className="brand-link text-center" href="/officer/dashboard">
         <span className="brand-text font-weight-light text-center">MicroHub</span>
       </a>
 
@@ -19,23 +19,23 @@ const AdminSidebar = ({ active }) => {
             <li className="nav-item">
               <a className={`nav-link ${
                     active === "dashboard" ? "active" : ""
-                  }`} href={"/admin/dashboard"}>
+                  }`} href={"/officer/dashboard"}>
                 <i className="nav-icon fa fa-house-user"></i>
                 Dashboard
               </a>
             </li>
 
-            <li className="nav-item">
-              <a href="/admin/officers" className={`nav-link ${
+            {/* <li className="nav-item">
+              <a href="/officer/officers" className={`nav-link ${
                     active === "officer" ? "active" : ""
                   }`}>
                 <i class="nav-icon  fa-solid fa-user-tie"></i>
                 Officers
               </a>
-            </li>
+            </li> */}
 
             <li className="nav-item">
-              <a href="/admin/clients" className={`nav-link ${
+              <a href="/officer/clients" className={`nav-link ${
                     active === "client" ? "active" : ""
                   }`}>
                 <i className="nav-icon fa fa-users"></i>
@@ -44,7 +44,7 @@ const AdminSidebar = ({ active }) => {
             </li>
 
             <li className="nav-item">
-              <a href="/admin/accounts" className={`nav-link ${
+              <a href="/officer/accounts" className={`nav-link ${
                     active === "account" ? "active" : ""
                   }`}>
                 <i className="nav-icon fa fa-wallet"></i>
@@ -53,7 +53,7 @@ const AdminSidebar = ({ active }) => {
             </li>
 
             <li className="nav-item">
-              <a href="/admin/loans" className={`nav-link ${
+              <a href="/officer/loans" className={`nav-link ${
                     active === "loan" ? "active" : ""
                   }`}>
                 <i className="nav-icon fa fa-hand-holding-dollar"></i>
@@ -62,7 +62,7 @@ const AdminSidebar = ({ active }) => {
             </li>
 
             <li className="nav-item">
-              <a href="/admin/transactions" className={`nav-link ${
+              <a href="/officer/transactions" className={`nav-link ${
                     active === "transaction" ? "active" : ""
                   }`} >
                 <i className="nav-icon fa fa-dollar-sign"></i>
@@ -71,7 +71,7 @@ const AdminSidebar = ({ active }) => {
             </li>
 
             <li className="nav-item">
-              <a href="/admin/reports" className={`nav-link ${
+              <a href="/officer/reports" className={`nav-link ${
                     active === "report" ? "active" : ""
                   }`} >
                 <i className="nav-icon fa fa-address-book"></i>
@@ -81,7 +81,7 @@ const AdminSidebar = ({ active }) => {
 
 
             <li className="nav-item">
-              <a href="/admin/tickets" className={`nav-link ${
+              <a href="/officer/tickets" className={`nav-link ${
                     active === "ticket" ? "active" : ""
                   }`}>
                 <i className="nav-icon fa fa-comments"></i>
@@ -89,7 +89,7 @@ const AdminSidebar = ({ active }) => {
               </a>
             </li>
 
-            <li className="nav-item">
+            {/* <li className="nav-item">
               <a href="/admin/logs" className={`nav-link ${
                     active === "logs" ? "active" : ""
                   }`} >
@@ -105,7 +105,7 @@ const AdminSidebar = ({ active }) => {
                     <i className="fas fa-cog nav-icon"></i>
                     Settings
                   </a>
-                </li>
+                </li> */}
 
               {/* <li className="nav-item ">
               <span className="nav-link text-white">

@@ -4,14 +4,14 @@ import "./Admin.css";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminHeader from "./components/AdminHeader";
 import AdminFooter from "./components/AdminFooter";
-import OfficerModal from "./OfficerModal";
-// import DeleteModal from "../components/DeleteModal";
+import ClientModal from "./ClientModal";
+import DeleteModal from "../components/DeleteModal";
 import axios from "axios";
 import { Spin } from "antd";
 import StatusModal from "../components/StatusModal";
 
 
-const ViewOfficers = () => {
+const OfficerClients = () => {
 
     const navigate = useNavigate();
     const [results, setResults] = useState([]);
@@ -22,14 +22,16 @@ const ViewOfficers = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
     const [count, setCount] = useState(0);
+    const [userId, setUserId] = useState(window.sessionStorage.getItem("userId"))
 
-
+ 
   useEffect(() => {
-    document.title = "View Officers | MicroHub";
-
-    setIsLoading(true);
+    document.title = "View Clients | MicroHub";
 
     const token = window.sessionStorage.getItem("token");
+
+
+    setIsLoading(true);
 
     if (!token) {
         navigate("/");
@@ -42,10 +44,10 @@ const ViewOfficers = () => {
       };
   
       axios
-        .get(`${import.meta.env.VITE_API_URL}/officers`, { headers })
+        .get(`${import.meta.env.VITE_API_URL}/clients/officer/${userId}`, { headers })
         .then((response) => {
           // console.log(response.data);
-          const sortedOfficers = response.data.officers.sort(
+          const sortedOfficers = response.data.clients.sort(
             (a, b) => new Date(b.userId.createdAt) - new Date(a.userId.createdAt)
           );
           setResults(sortedOfficers);
@@ -76,7 +78,7 @@ const ViewOfficers = () => {
   const filteredData = results.filter((result) =>
     result?.userId?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
   result?.userId?.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  result.officerId.toLowerCase().includes(searchTerm.toLowerCase())
+  result?.clientId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Calculate pagination
@@ -119,26 +121,28 @@ const ViewOfficers = () => {
       <div className="wrapper">
         <AdminHeader />
 
-        <AdminSidebar active={"officer"} />
+        <AdminSidebar active={"client"} />
 
         
-       {isLoading ? ( <Spin fullscreen={true} size={"large"} />) : 
-                (<>
+    {isLoading ? (
+                <Spin fullscreen={true} size={"large"} />
+                ) : ( 
+                <>
         <div className="content-wrapper">
         <div className="content-header">
             <div className="container-fluid">
                 <div className="row mb-2">
                     <div className="col-sm-4">
 
-                        <h1 className="m-0">Officers</h1>
+                        <h1 className="m-0">Assigned Clients</h1>
                     </div>
                     <div className="col-sm-4">
-                  <h5 className="p-0 m-auto">Total Officers: {count} </h5>
+                  <h5 className="p-0 m-auto">Total Clients: {count} </h5>
                 </div>
                     <div className="col-sm-4">
                         <ol className="breadcrumb float-sm-right">
                             <li className="breadcrumb-item"><a href="/">Dashboard</a></li>
-                            <li className="breadcrumb-item active">Officers</li>
+                            <li className="breadcrumb-item active">Clients</li>
                         </ol>
                     </div>
 
@@ -153,11 +157,11 @@ const ViewOfficers = () => {
                             <div className="card-header">
                                 <div className="row align-items-center">
                                     <div className="col-6">
-                                        <h3 className="card-title">Officers List</h3>
+                                        <h3 className="card-title">Clients List</h3>
                                     </div>
                                     <div className="col-6">
                                         <div className="float-right">
-                                        <OfficerModal title={"Create"} claxx={"btn btn-success btn-sm"} icon={"nav-icon fa fa-plus mr-2"} mode={"create"} buttonText={"Add New"} categories={categories} countries={countries} setIsLoading={setIsLoading} />
+                                        <ClientModal title={"Create"} officer={userId} claxx={"btn btn-success btn-sm"} icon={"nav-icon fa fa-plus mr-2"} mode={"create"} buttonText={"Add New"} setIsLoading={setIsLoading} />
                                         </div>
                                     </div>
                                 </div>
@@ -233,13 +237,13 @@ const ViewOfficers = () => {
                                         </div>
                                     </td>
                                             
-                                            <td>
+                                    <td>
                                                 
                                                 <div>
                                                 {result?.userId?.firstname} {result?.userId?.surname}
                                                 </div>
                                                 <div>
-                                                {result?.officerId}
+                                                {result?.clientId}
                                                 </div>
 
                                             </td>
@@ -255,7 +259,7 @@ const ViewOfficers = () => {
                                               </td>
                                           
 
-                                            <td>
+                                              <td>
                                               {result?.userId?.nationality || "Not set"}
                                             </td>
                                             
@@ -281,25 +285,25 @@ const ViewOfficers = () => {
 
                                             <td>
 
-                                                {/* <OfficerModal title={"Add Credit"} claxx={"btn btn-sm btn-secondary mr-3"} icon={"nav-icon fa fa-money-bill mr-2"} mode={"credit"} buttonText={"Add Credit"} /> */}
+                                                {/* <ClientModal title={"Add Credit"} claxx={"btn btn-sm btn-secondary mr-3"} icon={"nav-icon fa fa-money-bill mr-2"} mode={"credit"} buttonText={"Add Credit"} /> */}
 
                                            
-                                                <OfficerModal title={"View"} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} data={result} mode={"view"}  buttonText={"View"} formatDate={formatDate} capitalizeFirstLetter={capitalizeFirstLetter} />
-                                                <OfficerModal title={"Edit"} claxx={"btn btn-sm btn-warning mr-3"} icon={"nav-icon fa fa-edit mr-2"} data={result} mode={"edit"} buttonText={"Edit"} categories={categories} countries={countries} setIsLoading={setIsLoading}/>
-                                                {/* <DeleteModal title={"Delete Officer"} content={"Are you sure you want to delete this item? This action cannot be undone."} claxx={"btn btn-sm btn-danger mr-3"}/> */}
-                                                <StatusModal
-                                                  title={`${result?.userId?.status === "active" ? "Disable" : "Enable"} Officer`}
+                                                <ClientModal title={"View"} officer={userId} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} data={result} mode={"view"}  buttonText={"View"} formatDate={formatDate} capitalizeFirstLetter={capitalizeFirstLetter} />
+                                                <ClientModal title={"Edit"} officer={userId} claxx={"btn btn-sm btn-warning mr-3"} icon={"nav-icon fa fa-edit mr-2"} data={result} mode={"edit"} buttonText={"Edit"} setIsLoading={setIsLoading}/>
+                                                {/* <DeleteModal title={"Delete Client"} content={"Are you sure you want to delete this item? This action cannot be undone."} claxx={"btn btn-sm btn-danger mr-3"}/> */}
+                                                {/* <StatusModal
+                                                  title={`${result?.userId?.status === "active" ? "Disable" : "Enable"} Client`}
                                                   content={
-                                                    `Are you sure you want to ${result?.userId?.status === "active" ? "disable" : "enable"} this officer?`
+                                                    `Are you sure you want to ${result?.userId?.status === "active" ? "disable" : "enable"} this client?`
                                                   }
                                                   claxx={`btn btn-sm ${result?.userId?.status === "active" ? "btn-secondary" : "btn-success"} mr-3`}
                                                   setIsLoading={setIsLoading} 
                                                   id={result._id} 
-                                                  redirectUrl={'officers'} 
-                                                  updateUrl={'officers'}
+                                                  redirectUrl={'clients'} 
+                                                  updateUrl={'clients'}
                                                   status={result?.userId?.status}
-                                                  role={"officer"}
-                                                />
+                                                  role={"client"}
+                                                /> */}
                                             </td>
                                         </tr>
                                     )})
@@ -381,12 +385,11 @@ const ViewOfficers = () => {
 
         <AdminFooter />
         </>
-        )
-                 
-      } 
+               )} 
+
       </div>
     </div>
   );
 };
 
-export default ViewOfficers;
+export default OfficerClients;

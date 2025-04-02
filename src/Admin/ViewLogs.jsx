@@ -10,7 +10,7 @@ import axios from "axios";
 import { Spin } from 'antd';
 
 
-const ViewFaqs = () =>{
+const ViewLogs = () =>{
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [faqs, setFaqs] = useState([]);
@@ -18,51 +18,158 @@ const ViewFaqs = () =>{
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
 
+    const [logs, setLogs] = useState([
+        {
+          logId: "LOG098712345",
+          officerId: {
+            userId: {
+              firstname: "Naler",
+              surname: "Evasud",
+            },
+            officerId: "OFS99109060",
+          },
+          action: "Submitted a daily report",
+          createdAt: "2025-02-01T10:00:00.000Z",
+        },
+        {
+          logId: "LOG098712002",
+          officerId: {
+            userId: {
+              firstname: "Seth",
+              surname: "Otoo",
+            },
+            officerId: "OFS26009260",
+          },
+          action: "Added a new client",
+          createdAt: "2025-01-02T10:00:00.000Z",
+        },
+        {
+          logId: "LOG0987123147",
+          officerId: {
+            userId: {
+              firstname: "Renee",
+              surname: "Otchere",
+            },
+            officerId: "OFS44729672",
+          },
+          action: "Requested a new loan",
+          createdAt: "2025-01-03T10:00:00.000Z",
+        },
+        {
+          logId: "LOG0987125678",
+          officerId: {
+            userId: {
+              firstname: "Jake",
+              surname: "Mensah",
+            },
+            officerId: "OFS33011234",
+          },
+          action: "Approved a loan application",
+          createdAt: "2025-02-05T09:30:00.000Z",
+        },
+        {
+          logId: "LOG0987126789",
+          officerId: {
+            userId: {
+              firstname: "Linda",
+              surname: "Boateng",
+            },
+            officerId: "OFS55887766",
+          },
+          action: "Requested a loan repayment",
+          createdAt: "2025-02-06T14:45:00.000Z",
+        },
+        {
+          logId: "LOG0987127890",
+          officerId: {
+            userId: {
+              firstname: "Kojo",
+              surname: "Amponsah",
+            },
+            officerId: "OFS99221133",
+          },
+          action: "Deposited an amount into client wallet",
+          createdAt: "2025-02-07T12:20:00.000Z",
+        },
+        {
+          logId: "LOG0987128901",
+          officerId: {
+            userId: {
+              firstname: "Emilia",
+              surname: "Asante",
+            },
+            officerId: "OFS66554433",
+          },
+          action: "Scheduled a loan repayment",
+          createdAt: "2025-02-08T16:00:00.000Z",
+        },
+        {
+          logId: "LOG0987129012",
+          officerId: {
+            userId: {
+              firstname: "Richard",
+              surname: "Dapaah",
+            },
+            officerId: "OFS77889900",
+          },
+          action: "Updated a clients contact information",
+          createdAt: "2025-02-09T08:15:00.000Z",
+        },
+      ]);
+      
+
 
     useEffect(() => {
         document.title = "View Activity Log | MicroHub";
         setIsLoading(true);
-        const token = window.sessionStorage.getItem("token");
 
-        // if (!token) {
-        //     navigate("/");
-        //     return;
-        //   }
+    const token = window.sessionStorage.getItem("token");
 
-        const headers = {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        };
+    if (!token) {
+      navigate("/");
+      return;
+    }
 
-        setIsLoading(false)
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
 
-        // axios.get(`${process.env.REACT_APP_API_URL}/faqs`, { headers })
-        // .then((response) => {
-        //     // console.log(response.data.data);
-        //     const sortedFaqs = response.data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        //     setFaqs(sortedFaqs);
-        //     setIsLoading(false);
-        // })
-        // .catch((error) => {
-        // //   openNotification(
-        // //     "topRight",
-        // //     "error",
-        // //     "Error",
-        // //     "An error occurred while creating the faq. Please try again."
-        // //   );
-        //   console.error(error);
-        //   setIsLoading(false);
-        // })
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/logs`, { headers })
+      .then((response) => {
+        // console.log(response.data);
+        const sortedOfficers = response.data.logs.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setResults(sortedOfficers);
+        setCount(response.data.count);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setIsLoading(false);
+      });
 
     },[navigate])
 
-    const truncateString = (str)  => {
-        if (str.length > 50) {
-          return str.slice(0, 50 - 3) + '...';
-        } else {
-          return str;
-        }
-      }
+    const formatDate = (dateTimeString) => {
+        const date = new Date(dateTimeString);
+        const options = { year: "numeric", month: "long", day: "numeric" };
+        return date.toLocaleDateString("en-US", options);
+      };
+    
+      const formatTime = (dateTimeString) => {
+        const date = new Date(dateTimeString);
+        let hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, "0");
+        const amPM = hours >= 12 ? "PM" : "AM";
+    
+        hours = hours % 12 || 12;
+        hours = hours.toString().padStart(2, "0");
+    
+        return `${hours}:${minutes} ${amPM}`;
+      };
 
       const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
@@ -70,14 +177,11 @@ const ViewFaqs = () =>{
       };
     
     
-      const filteredData = faqs.filter(
-        (faq) =>
-            faq.question
+      const filteredData = logs.filter(
+        (log) =>
+            log.logId
             .toLowerCase()
-            .includes(searchTerm.toLowerCase())  ||
-            faq.answer
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) 
+            .includes(searchTerm.toLowerCase())
       );
     
       // Calculate pagination
@@ -103,7 +207,7 @@ const ViewFaqs = () =>{
 
             <AdminHeader />
 
-            <AdminSidebar active={"faq"} />
+            <AdminSidebar active={"logs"} />
 
             {isLoading ? (<Spin  fullscreen={true} size={'large'} />) : (
                 <>
@@ -169,36 +273,38 @@ const ViewFaqs = () =>{
                                                     <table id="myTable" className="table table-hover text-nowrap jsgrid-table">
                                                         <thead>
                                                             <tr>
-                                                                <th>SL</th>
-                                                                <th>Order Number</th>
-                                                                <th>Question</th>
-                                                                <th>Answer</th>
-                                                                <th>Published Status</th>
+                                                                <th>Log ID</th>
+                                                                <th>User</th>
                                                                 <th>Action</th>
+                                                                <th>Performed On</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
 
                                                             {currentPageData.length === 0 ? (
                                                                 <tr colspan="10" className="text-center">
-                                                                    <td colspan="10">No matching records found</td>
+                                                                    <td colspan="10">No data found</td>
                                                                 </tr>
                                                             ) : (
-                                                                currentPageData.map((faq, index) => (
+                                                                currentPageData.map((result, index) => (
                                                                     <tr key={index}>
-                                                                    <td>{index  + 1 }</td>
-                                                                    <td className="text-center">{faq.order}</td>
-                                                                    <td>{faq.question}</td>
-                                                                    <td>{truncateString(faq.answer)}</td>
-                                                                    <td><span className="badge badge-success">Active</span></td>
-
+                                                                    <td>{result.logId}</td>
                                                                     <td>
-                                                                        <FaqModal title={"View"} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} mode={"view"} data={faq} buttonText={"View"} />
-
-                                                                        <FaqModal title={"Edit"} claxx={"btn btn-sm btn-warning mr-3"} icon={"nav-icon fa fa-edit mr-2"} mode={"edit"} data={faq} buttonText={"Edit"} />
-                                                                        <DeleteModal title={"Delete FAQ"} content={"Are you sure you want to delete this item? This action cannot be undone."} claxx={"btn btn-sm btn-danger mr-3"} setIsLoading={setIsLoading} id={faq.id} redirectUrl={'faqs'} deleteUrl={'faqs'}/>
-
+                                                                    <div>
+                                                                        {result?.officerId?.userId?.firstname}{" "}
+                                                                        {result?.officerId?.userId?.surname}
+                                                                    </div>
+                                                                    <div>
+                                                                        {result?.officerId?.officerId}
+                                                                    </div>
                                                                     </td>
+                                                                    <td>{result.action}</td>
+                                                                    <td>
+                                                                    <div>{formatDate(result?.createdAt)}</div>
+                                                                    <div>{formatTime(result?.createdAt)}</div>
+                                                                    </td>
+
+                                                                   
                                                                     </tr>
                                                             ))
                                                             )}
@@ -285,4 +391,4 @@ const ViewFaqs = () =>{
 }
 
 
-export default ViewFaqs;
+export default ViewLogs;

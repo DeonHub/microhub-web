@@ -5,7 +5,7 @@ import AdminSidebar from "./components/AdminSidebar";
 import AdminHeader from "./components/AdminHeader";
 import AdminFooter from "./components/AdminFooter";
 import ClientModal from "./ClientModal";
-// import DeleteModal from "../components/DeleteModal";
+import DeleteModal from "../components/DeleteModal";
 import axios from "axios";
 import { Spin } from "antd";
 import StatusModal from "../components/StatusModal";
@@ -21,74 +21,57 @@ const ViewClients = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
-
+    const [officers, setOfficers] = useState([]);
+    const [count, setCount] = useState(0);
 
   useEffect(() => {
     document.title = "View Clients | MicroHub";
 
     setIsLoading(true);
 
-    // get clients from localhost clientsData
-    const clientsData = localStorage.getItem("clientsData");
-    setResults(JSON.parse(clientsData).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) || []);
+    const token = window.sessionStorage.getItem("token");
 
-    setTimeout(()  => {
-      setIsLoading(false);
-    }, 3000);
+    if (!token) {
+        navigate("/");
+        return;
+      }
 
-    // const token = window.sessionStorage.getItem("token");
+  const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
 
-  //   if (!token) {
-  //       navigate("/");
-  //       return;
-  //     }
 
-  // const headers = {
-  //       Authorization: `Bearer ${token}`,
-  //       "Content-Type": "application/json",
-  //     };
+      axios
+      .get(`${import.meta.env.VITE_API_URL}/officers`, { headers })
+      .then((response) => {
+        // console.log(response.data);
+        const sortedOfficers = response.data.officers.sort(
+          (a, b) => new Date(b.userId.createdAt) - new Date(a.userId.createdAt)
+        );
+        setOfficers(sortedOfficers);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+
   
-  //     axios
-  //       .get(`${process.env.REACT_APP_API_URL}/clients`, { headers })
-  //       .then((response) => {
-  //         console.log(response.data);
-  //         const sortedClients = response.data.data.sort(
-  //           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  //         );
-  //         setClients(sortedClients);
-  //       //   setIsLoading(false);
-  //       })
-  //       .catch((error) => {
-  //         console.error(error);
-  //       //   setIsLoading(false);
-  //       });
-
-  //       axios
-  //       .get(`${process.env.REACT_APP_API_URL}/categories`, { headers })
-  //       .then((response) => {
-  //         // console.log(response.data.data);
-  //         const sortedCategories = response.data.data.sort(
-  //           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  //         );
-  //         setCategories(sortedCategories);
-  //       //   setIsLoading(false);
-  //       })
-  //       .catch((error) => {
-  //         console.error(error);
-  //       //   setIsLoading(false);
-  //       });
-
-  //       axios
-  //       .get(`${process.env.REACT_APP_API_URL}/countries`, { headers })
-  //       .then((response) => {
-  //         // console.log(response.data.data);
-  //         setCountries(response.data.data);
-  //         setIsLoading(false);
-  //       })
-  //       .catch((error) => {
-  //         console.error(error);
-  //         setIsLoading(false);
-  //       });  
+      axios
+        .get(`${import.meta.env.VITE_API_URL}/clients`, { headers })
+        .then((response) => {
+          // console.log(response.data);
+          const sortedOfficers = response.data.clients.sort(
+            (a, b) => new Date(b.userId.createdAt) - new Date(a.userId.createdAt)
+          );
+          setResults(sortedOfficers);
+          setCount(response.data.count);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setIsLoading(false);
+        });
 
 
   }, [navigate]);
@@ -107,9 +90,9 @@ const ViewClients = () => {
   };
 
   const filteredData = results.filter((result) =>
-    result.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  result.lastname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  result.userId.toLowerCase().includes(searchTerm.toLowerCase())
+    result?.userId?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  result?.userId?.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  result?.clientId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Calculate pagination
@@ -163,11 +146,14 @@ const ViewClients = () => {
         <div className="content-header">
             <div className="container-fluid">
                 <div className="row mb-2">
-                    <div className="col-sm-6">
+                    <div className="col-sm-4">
 
                         <h1 className="m-0">Clients</h1>
                     </div>
-                    <div className="col-sm-6">
+                    <div className="col-sm-4">
+                  <h5 className="p-0 m-auto">Total Clients: {count} </h5>
+                </div>
+                    <div className="col-sm-4">
                         <ol className="breadcrumb float-sm-right">
                             <li className="breadcrumb-item"><a href="/">Dashboard</a></li>
                             <li className="breadcrumb-item active">Clients</li>
@@ -189,7 +175,7 @@ const ViewClients = () => {
                                     </div>
                                     <div className="col-6">
                                         <div className="float-right">
-                                        <ClientModal title={"Create"} claxx={"btn btn-success btn-sm"} icon={"nav-icon fa fa-plus mr-2"} mode={"create"} buttonText={"Add New"} categories={categories} countries={countries} setIsLoading={setIsLoading} />
+                                        <ClientModal title={"Create"} officers={officers} claxx={"btn btn-success btn-sm"} icon={"nav-icon fa fa-plus mr-2"} mode={"create"} buttonText={"Add New"} categories={categories} countries={countries} setIsLoading={setIsLoading} />
                                         </div>
                                     </div>
                                 </div>
@@ -257,51 +243,55 @@ const ViewClients = () => {
                                      return(
                                         <tr key={key}>
                                           <td><div className="float-left p-2">
-                                            <img src={result?.profilePicture} className="border rounded-circle" alt="default" width="50" height="50" />
+                                            <img src={
+                                              result?.userId?.profilePicture
+                                                  ? result?.userId?.profilePicture
+                                                  : `https://ui-avatars.com/api/?name=${result?.userId?.firstname}+${result?.userId?.surname}&background=random&color=fff`} 
+                                            className="border rounded-circle" alt="default" width="50" height="50" />
                                         </div>
                                     </td>
                                             
-                                            <td>
+                                    <td>
                                                 
                                                 <div>
-                                                {result?.firstname} {result?.lastname}
+                                                {result?.userId?.firstname} {result?.userId?.surname}
                                                 </div>
                                                 <div>
-                                                {result?.userId}
+                                                {result?.clientId}
                                                 </div>
 
                                             </td>
                                             
                                             <td>
                                             <div>
-                                            {result?.email}
+                                            {result?.userId?.email}
                                                 </div>
                                                 <div>
-                                                {result?.phoneNumber}
+                                                {result?.userId?.contact}
                                                 </div>
                                               
                                               </td>
                                           
 
-                                            <td>
-                                              {result?.nationality}
+                                              <td>
+                                              {result?.userId?.nationality || "Not set"}
                                             </td>
                                             
 
                                             <td className="text-muted">
                                             
-                                                <span className={`badge ${result?.status === "active" ? "badge-success" : "badge-danger"}`}>
-                                                    {capitalizeFirstLetter(result?.status)}
+                                                <span className={`badge ${result?.userId?.status === "active" ? "badge-success" : "badge-danger"}`}>
+                                                    {capitalizeFirstLetter(result?.userId?.status)}
                                                 </span>
                                                
                                             </td>
 
                                             <td>
                                             <div>
-                                            {formatDate(result?.createdAt)}
+                                            {formatDate(result?.userId?.createdAt)}
                                                 </div>
                                                 <div>
-                                            {formatTime(result?.createdAt)}
+                                            {formatTime(result?.userId?.createdAt)}
                                                 </div>
                                                
                                               
@@ -312,20 +302,20 @@ const ViewClients = () => {
                                                 {/* <ClientModal title={"Add Credit"} claxx={"btn btn-sm btn-secondary mr-3"} icon={"nav-icon fa fa-money-bill mr-2"} mode={"credit"} buttonText={"Add Credit"} /> */}
 
                                            
-                                                <ClientModal title={"View"} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} data={result} mode={"view"}  buttonText={"View"} formatDate={formatDate} capitalizeFirstLetter={capitalizeFirstLetter} />
-                                                <ClientModal title={"Edit"} claxx={"btn btn-sm btn-warning mr-3"} icon={"nav-icon fa fa-edit mr-2"} data={result} mode={"edit"} buttonText={"Edit"} categories={categories} countries={countries} setIsLoading={setIsLoading}/>
+                                                <ClientModal title={"View"} officers={officers} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} data={result} mode={"view"}  buttonText={"View"} formatDate={formatDate} capitalizeFirstLetter={capitalizeFirstLetter} />
+                                                <ClientModal title={"Edit"} officers={officers} claxx={"btn btn-sm btn-warning mr-3"} icon={"nav-icon fa fa-edit mr-2"} data={result} mode={"edit"} buttonText={"Edit"} setIsLoading={setIsLoading}/>
                                                 {/* <DeleteModal title={"Delete Client"} content={"Are you sure you want to delete this item? This action cannot be undone."} claxx={"btn btn-sm btn-danger mr-3"}/> */}
                                                 <StatusModal
-                                                  title={`${result?.status === "active" ? "Disable" : "Enable"} Client`}
+                                                  title={`${result?.userId?.status === "active" ? "Disable" : "Enable"} Client`}
                                                   content={
-                                                    `Are you sure you want to ${result?.status === "active" ? "disable" : "enable"} this client?`
+                                                    `Are you sure you want to ${result?.userId?.status === "active" ? "disable" : "enable"} this client?`
                                                   }
-                                                  claxx={`btn btn-sm ${result?.status === "active" ? "btn-secondary" : "btn-success"} mr-3`}
+                                                  claxx={`btn btn-sm ${result?.userId?.status === "active" ? "btn-secondary" : "btn-success"} mr-3`}
                                                   setIsLoading={setIsLoading} 
-                                                  id={result.userId} 
+                                                  id={result._id} 
                                                   redirectUrl={'clients'} 
                                                   updateUrl={'clients'}
-                                                  status={result?.status}
+                                                  status={result?.userId?.status}
                                                   role={"client"}
                                                 />
                                             </td>

@@ -19,23 +19,13 @@ const TicketModal = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [formState, setFormState] = useState({
-    question: "",
-    answer: "",
-    status: "",
-    order: "",
+    reportType: "",
+    subject: "",
+    message: "",
+    supportingDocument: "",
   });
   const [reply, setReply] = useState("")
 
-  useEffect(() => {
-    if (data) {
-      setFormState({
-        question: data.question,
-        answer: data.answer,
-        status: data.status,
-        order: data.order,
-      });
-    }
-  }, [data]);
 
   const showModal = () => {
     setOpen(true);
@@ -72,7 +62,7 @@ const TicketModal = ({
 
     const body = new FormData();
     body.append("message", reply);
-    body.append("role", "admin");
+    body.append("role", "user");
 
     // console.log(body)
     setIsLoading(true)
@@ -107,48 +97,67 @@ const TicketModal = ({
     })
   }
 
-  const handleUpdate = (status) => {
+  const handleSubmit = () => {
     const token = window.sessionStorage.getItem("token");
     const headers = {
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
     };
 
-    const body = {
-      "status": status, 
-    }
+    if (mode === "create") {
+      const nonRequiredFields = ["supportingDocument"];
+      // console.log(formState)
 
-    // console.log(body)
-    setIsLoading(true)
-
-    axios.patch(`${import.meta.env.VITE_API_URL}/tickets/${data?._id}`, body, { headers })
-    .then((response) => {
-      if(response.data.success){
-        setIsLoading(false)
+      if (
+        Object.entries(formState).some(
+          ([key, value]) =>
+            !nonRequiredFields.includes(key) && !value?.toString().trim()
+        )
+      ) {
         openNotification(
           "topRight",
-          "success",
-          "Ticket updated successfully",
-          "Ticket status has been updated successfully."
+          "error",
+          "Missing Information",
+          "Please fill in all required fields"
         );
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        return;
       }
-      
-    })
-    .catch((error) => {
-      setIsLoading(false);
 
-      openNotification(
-        "topRight",
-        "error",
-        "Error",
-        'An error occurred while updating the ticket.'
-      );
-      console.error(error);
-    })
-  }
+      setIsLoading(true);
+
+      const body = new FormData();
+      for (const key in formState) {
+        body.append(key, formState[key]);
+      }
+
+      axios
+        .post(`${import.meta.env.VITE_API_URL}/tickets`, body, {
+          headers,
+        })
+        .then((response) => {
+          openNotification(
+            "topRight",
+            "success",
+            "Ticket created successfully",
+            "Ticket has been created successfully."
+          );
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        })
+        .catch((error) => {
+          openNotification(
+            "topRight",
+            "error",
+            "Error",
+            "An error occurred while creating the report."
+          );
+          console.error(error);
+          setIsLoading(false);
+        })
+    } 
+  };
 
   return (
     <>
@@ -195,16 +204,7 @@ const TicketModal = ({
                 <td width="20%">Ticket ID</td>
                 <td width="80%">{data?.ticketId}</td>
               </tr>
-              <tr>
-                <td>Submitted By</td>
-                <td>
-                  <div>
-                    {data?.officerId?.userId?.firstname}{" "}
-                    {data?.officerId?.userId?.surname}
-                  </div>
-                  <div>{data?.officerId?.officerId}</div>
-                </td>
-              </tr>
+             
               <tr>
                 <td>Submitted On</td>
                 <td>
@@ -277,34 +277,6 @@ const TicketModal = ({
               </tr>
             </table>
 
-            {(data?.status === "pending" || data?.status === "open") && (
-              <div className="card-footer">
-                <div className="row">
-                  <div className="col-sm-12">
-                    <button
-                      className="btn btn-success btn-sm btn-block"
-                      type="button"
-                      onClick={() => {
-                        handleUpdate("closed");
-                      }}
-                    >
-                      Resolve & Close
-                    </button>
-                  </div>
-                  {/* <div className="col-sm-6">
-                    <button
-                      className="btn btn-danger btn-sm btn-block"
-                      type="button"
-                      onClick={() => {
-                        handleUpdate("denied");
-                      }}
-                    >
-                      Close
-                    </button>
-                  </div> */}
-                </div>
-              </div>
-            )}
           </div>
         ) : mode === "create" ? (
           <>
@@ -379,7 +351,7 @@ const TicketModal = ({
                 <button
                   className="btn btn-success btn-sm btn-block"
                   type="button"
-                  // onClick={handleSubmit}
+                  onClick={handleSubmit}
                 >
                   Submit
                 </button>

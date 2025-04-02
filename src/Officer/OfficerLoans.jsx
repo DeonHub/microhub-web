@@ -4,15 +4,13 @@ import "./Admin.css";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminHeader from "./components/AdminHeader";
 import AdminFooter from "./components/AdminFooter";
-import OfficerModal from "./OfficerModal";
-// import DeleteModal from "../components/DeleteModal";
+import LoanModal from "./LoanModal";
 import axios from "axios";
+
 import { Spin } from "antd";
-import StatusModal from "../components/StatusModal";
 
 
-const ViewOfficers = () => {
-
+const OfficerLoans = () => {
     const navigate = useNavigate();
     const [results, setResults] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -21,11 +19,12 @@ const ViewOfficers = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
-    const [count, setCount] = useState(0);
-
+    const [clients, setClients] = useState([]);
+    const [count, setCount] = useState(0)
+    const [userId, setUserId] = useState(window.sessionStorage.getItem("userId"))
 
   useEffect(() => {
-    document.title = "View Officers | MicroHub";
+    document.title = "View Loans | MicroHub";
 
     setIsLoading(true);
 
@@ -40,13 +39,30 @@ const ViewOfficers = () => {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       };
+
+
+
+      axios
+      .get(`${import.meta.env.VITE_API_URL}/clients/officer/${userId}`, { headers })
+      .then((response) => {
+        // console.log(response.data);
+        const sortedOfficers = response.data.clients.sort(
+          (a, b) => new Date(b.userId.createdAt) - new Date(a.userId.createdAt)
+        );
+        setClients(sortedOfficers);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+
   
       axios
-        .get(`${import.meta.env.VITE_API_URL}/officers`, { headers })
+        .get(`${import.meta.env.VITE_API_URL}/loans/officer/${userId}`, { headers })
         .then((response) => {
           // console.log(response.data);
-          const sortedOfficers = response.data.officers.sort(
-            (a, b) => new Date(b.userId.createdAt) - new Date(a.userId.createdAt)
+          const sortedOfficers = response.data.loans.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           );
           setResults(sortedOfficers);
           setCount(response.data.count);
@@ -56,17 +72,7 @@ const ViewOfficers = () => {
           console.error(error);
           setIsLoading(false);
         });
-
-
   }, [navigate]);
-
-  const capitalizeFirstLetter = (word) => {
-    if (typeof word !== "string" || word.length === 0) {
-      return ""; // Handle invalid input
-    }
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-  };
-
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -74,9 +80,9 @@ const ViewOfficers = () => {
   };
 
   const filteredData = results.filter((result) =>
-    result?.userId?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  result?.userId?.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  result.officerId.toLowerCase().includes(searchTerm.toLowerCase())
+    result?.loanId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  result?.clientId?.userId?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  result?.clientId?.userId?.surname.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Calculate pagination
@@ -96,6 +102,14 @@ const ViewOfficers = () => {
     setCurrentPage(pageNumber);
   };
 
+  const capitalizeFirstLetter = (word) => {
+    if (typeof word !== "string" || word.length === 0) {
+      return ""; // Handle invalid input
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  };
+
+
   const formatDate = (dateTimeString) => {
     const date = new Date(dateTimeString);
     const options = { year: "numeric", month: "long", day: "numeric" };
@@ -114,57 +128,72 @@ const ViewOfficers = () => {
     return `${hours}:${minutes} ${amPM}`;
   };
 
+  const formatCurrency = (value) => {
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+      return "Invalid number";
+    }
+
+    return number.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+
   return (
     <div className="hold-transition sidebar-mini">
       <div className="wrapper">
         <AdminHeader />
 
-        <AdminSidebar active={"officer"} />
-
-        
-       {isLoading ? ( <Spin fullscreen={true} size={"large"} />) : 
-                (<>
+        <AdminSidebar active={"loan"} />
+{isLoading ? (
+          <Spin fullscreen={true} size={"large"} />
+        ) : (
+          <>
         <div className="content-wrapper">
-        <div className="content-header">
+          <div className="content-header">
             <div className="container-fluid">
-                <div className="row mb-2">
-                    <div className="col-sm-4">
-
-                        <h1 className="m-0">Officers</h1>
-                    </div>
-                    <div className="col-sm-4">
-                  <h5 className="p-0 m-auto">Total Officers: {count} </h5>
+              <div className="row mb-2">
+                <div className="col-sm-4">
+                  <h1 className="m-0">Loans</h1>
                 </div>
-                    <div className="col-sm-4">
-                        <ol className="breadcrumb float-sm-right">
-                            <li className="breadcrumb-item"><a href="/">Dashboard</a></li>
-                            <li className="breadcrumb-item active">Officers</li>
-                        </ol>
-                    </div>
-
+                <div className="col-sm-4">
+                  <h5 className="p-0 m-auto">Total Requests: {count} </h5>
                 </div>
+                <div className="col-sm-4">
+                  <ol className="breadcrumb float-sm-right">
+                    <li className="breadcrumb-item">
+                      <a href="admin.dashboard">Dashboard</a>
+                    </li>
+                    <li className="breadcrumb-item active">Loans</li>
+                  </ol>
+                </div>
+              </div>
             </div>
-        </div>
-        <div className="content">
+          </div>
+
+          <div className="content">
             <div className="container-fluid">
-                <div className="row">
-                    <div className="col-lg-12">
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="row align-items-center">
-                                    <div className="col-6">
-                                        <h3 className="card-title">Officers List</h3>
-                                    </div>
-                                    <div className="col-6">
-                                        <div className="float-right">
-                                        <OfficerModal title={"Create"} claxx={"btn btn-success btn-sm"} icon={"nav-icon fa fa-plus mr-2"} mode={"create"} buttonText={"Add New"} categories={categories} countries={countries} setIsLoading={setIsLoading} />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+              <div className="row">
+                <div className="col-lg-12">
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="row align-items-center">
+                        <div className="col-6">
+                          <h3 className="card-title">Loan Requests</h3>
+                        </div>
+                      
+                        <div className="col-6">
+                          <div className="float-right">
+                             <LoanModal title={"Create"} claxx={"btn btn-success btn-sm"} icon={"nav-icon fa fa-plus mr-2"} mode={"create"} buttonText={"Add New"} setIsLoading={setIsLoading} clients={clients} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-
-                            <div className="px-3 py-2">
+                    <div className="px-3 py-2">
                           <div className="row align-items-center">
                             <div className="col-6">
                               <span className="text-sm mr-1">Show</span>
@@ -175,9 +204,7 @@ const ViewOfficers = () => {
                                   setItemsPerPage(e.target.value);
                                 }}
                               >
-                                <option value="10" selected>
-                                  10
-                                </option>
+                                <option value="10" selected>10</option>
                                 <option value="25">25</option>
                                 <option value="50">50</option>
                                 <option value="100">100</option>
@@ -198,25 +225,23 @@ const ViewOfficers = () => {
                           </div>
                         </div>
 
-
-                            <div className="card-body table-responsive p-0">
-                                <table id="dataTables" className="table table-hover text-nowrap jsgrid-table">
-                                    <thead>
-                                    <tr>
-                                        
-                                        <th>Profile</th>
-                                        <th>User</th>
-                                        <th>Email/Phone Number</th>
-                                        <th>Country</th>
-                                        <th>Status</th>
-                                        <th>Added On</th>
-                                        <th>Action</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-
-
-                                {currentPageData.length === 0 ? (
+                    <div className="card-body table-responsive p-0">
+                      <table
+                        id="dataTables"
+                        className="table table-hover text-nowrap jsgrid-table"
+                      >
+                        <thead>
+                          <tr>
+                            <th>Loan ID</th>
+                            <th>Client Info</th>
+                            <th>Total Amount</th>
+                            <th>Issued Date</th>
+                            <th>Loan Status</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        {currentPageData.length === 0 ? (
                                    <tr>
                                    <td className="w-full px-3 py-4 text-center text-black" colSpan="7">No data</td>
                                  </tr>
@@ -225,90 +250,63 @@ const ViewOfficers = () => {
                                      return(
                                         <tr key={key}>
                                           <td><div className="float-left p-2">
-                                            <img src={
-                                              result?.userId?.profilePicture
-                                                  ? result?.userId?.profilePicture
-                                                  : `https://ui-avatars.com/api/?name=${result?.userId?.firstname}+${result?.userId?.surname}&background=random&color=fff`} 
-                                            className="border rounded-circle" alt="default" width="50" height="50" />
+                                            {result?.loanId}
+                                            
                                         </div>
                                     </td>
                                             
-                                            <td>
-                                                
+                                    <td>
                                                 <div>
-                                                {result?.userId?.firstname} {result?.userId?.surname}
+                                                {result?.clientId?.userId?.firstname} {result?.clientId?.userId?.surname}
                                                 </div>
                                                 <div>
-                                                {result?.officerId}
+                                                {result?.clientId?.clientId}
                                                 </div>
 
                                             </td>
                                             
-                                            <td>
-                                            <div>
-                                            {result?.userId?.email}
-                                                </div>
-                                                <div>
-                                                {result?.userId?.contact}
-                                                </div>
-                                              
-                                              </td>
-                                          
-
-                                            <td>
-                                              {result?.userId?.nationality || "Not set"}
+                                              <td>
+                                              GHS {formatCurrency(result?.totalAmount || 0) || 0.00}
                                             </td>
                                             
-
-                                            <td className="text-muted">
-                                            
-                                                <span className={`badge ${result?.userId?.status === "active" ? "badge-success" : "badge-danger"}`}>
-                                                    {capitalizeFirstLetter(result?.userId?.status)}
-                                                </span>
-                                               
-                                            </td>
 
                                             <td>
                                             <div>
-                                            {formatDate(result?.userId?.createdAt)}
+                                            {formatDate(result?.createdAt)}
                                                 </div>
                                                 <div>
-                                            {formatTime(result?.userId?.createdAt)}
+                                            {formatTime(result?.createdAt)}
                                                 </div>
                                                
                                               
                                               </td>
 
+                                              <td className="text-muted">
+                                            
+                                            <span className={`badge ${result?.status === "approved" ? "badge-success" : result?.status === "pending" ? "badge-warning" : "badge-danger"}`}>
+                                                {capitalizeFirstLetter(result?.status)}
+                                            </span>
+                                           
+                                        </td>
+
                                             <td>
 
-                                                {/* <OfficerModal title={"Add Credit"} claxx={"btn btn-sm btn-secondary mr-3"} icon={"nav-icon fa fa-money-bill mr-2"} mode={"credit"} buttonText={"Add Credit"} /> */}
+                                                {/* <ClientModal title={"Add Credit"} claxx={"btn btn-sm btn-secondary mr-3"} icon={"nav-icon fa fa-money-bill mr-2"} mode={"credit"} buttonText={"Add Credit"} /> */}
 
                                            
-                                                <OfficerModal title={"View"} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} data={result} mode={"view"}  buttonText={"View"} formatDate={formatDate} capitalizeFirstLetter={capitalizeFirstLetter} />
-                                                <OfficerModal title={"Edit"} claxx={"btn btn-sm btn-warning mr-3"} icon={"nav-icon fa fa-edit mr-2"} data={result} mode={"edit"} buttonText={"Edit"} categories={categories} countries={countries} setIsLoading={setIsLoading}/>
-                                                {/* <DeleteModal title={"Delete Officer"} content={"Are you sure you want to delete this item? This action cannot be undone."} claxx={"btn btn-sm btn-danger mr-3"}/> */}
-                                                <StatusModal
-                                                  title={`${result?.userId?.status === "active" ? "Disable" : "Enable"} Officer`}
-                                                  content={
-                                                    `Are you sure you want to ${result?.userId?.status === "active" ? "disable" : "enable"} this officer?`
-                                                  }
-                                                  claxx={`btn btn-sm ${result?.userId?.status === "active" ? "btn-secondary" : "btn-success"} mr-3`}
-                                                  setIsLoading={setIsLoading} 
-                                                  id={result._id} 
-                                                  redirectUrl={'officers'} 
-                                                  updateUrl={'officers'}
-                                                  status={result?.userId?.status}
-                                                  role={"officer"}
-                                                />
+                                                <LoanModal title={"View"} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} data={result} mode={"view"} setIsLoading={setIsLoading} formatCurrency={formatCurrency} buttonText={"View"} formatDate={formatDate} capitalizeFirstLetter={capitalizeFirstLetter} />
+                                               
                                             </td>
                                         </tr>
                                     )})
                            )}
-                                    </tbody>
-                                </table>
-                            </div>
 
-                            <div className="px-3 mt-2 row">
+
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="px-3 mt-2 row">
                           <div className="col-6">
                             <p>
                               {`Showing ${
@@ -369,24 +367,19 @@ const ViewOfficers = () => {
                             </nav>
                           </div>
                         </div>
-
-
-                        </div>
-
-                    </div>
+                  </div>
                 </div>
+              </div>
             </div>
+          </div>
         </div>
-    </div>
 
         <AdminFooter />
         </>
-        )
-                 
-      } 
+        )}
       </div>
     </div>
   );
 };
 
-export default ViewOfficers;
+export default OfficerLoans;

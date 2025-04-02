@@ -18,7 +18,7 @@ const TransactionModal = ({
   formatDate,
   formatTime,
   formatCurrency,
-   capitalizeFirstLetter
+  capitalizeFirstLetter,
 }) => {
   const [open, setOpen] = useState(false);
   const [formState, setFormState] = useState({
@@ -29,7 +29,6 @@ const TransactionModal = ({
     notes: "",
     paymentProof: "",
   });
-
 
   const showModal = () => {
     setOpen(true);
@@ -42,22 +41,20 @@ const TransactionModal = ({
   };
 
   const handleSubmit = () => {
-    
     const token = window.sessionStorage.getItem("token");
     const headers = {
       Authorization: `Bearer ${token}`,
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     };
 
-    if(mode === 'create'){
+    if (mode === "create") {
       const nonRequiredFields = ["paymentProof", "notes"];
       // console.log(formState)
 
       if (
         Object.entries(formState).some(
-          ([key, value]) => 
-            !nonRequiredFields.includes(key) &&
-            !value?.toString().trim()
+          ([key, value]) =>
+            !nonRequiredFields.includes(key) && !value?.toString().trim()
         )
       ) {
         openNotification(
@@ -69,42 +66,43 @@ const TransactionModal = ({
         return;
       }
 
-
       setIsLoading(true);
 
       const body = new FormData();
       for (const key in formState) {
-      body.append(key, formState[key]);
+        body.append(key, formState[key]);
       }
 
       // console.log(formState);
-      axios.post(`${import.meta.env.VITE_API_URL}/transactions`, body, { headers })
-      .then((response) => {
-        if (response.data.success) {
-          setIsLoading(false);
+      axios
+        .post(`${import.meta.env.VITE_API_URL}/transactions`, body, { headers })
+        .then((response) => {
+          if (response.data.success) {
+            setIsLoading(false);
 
+            openNotification(
+              "topRight",
+              "success",
+              "Success",
+              "Transaction saved successfully. Waiting for admin approval."
+            );
+
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
+        })
+        .catch((error) => {
           openNotification(
             "topRight",
-            "success",
-            "Success",
-            "Transaction saved successfully. Waiting for admin approval."
+            "error",
+            "Error",
+            error.response.data.message ||
+              "An error occurred while creating the loan."
           );
-
-          setTimeout(() => {
-              window.location.reload();
-          }, 1000)
-        }
-      })
-      .catch((error) => {
-        openNotification(
-          "topRight",
-          "error",
-          "Error",
-          error.response.data.message || "An error occurred while creating the loan."
-        );
-        setIsLoading(false);
-      });
-    } 
+          setIsLoading(false);
+        });
+    }
   };
 
   const handleCancel = () => {
@@ -114,61 +112,59 @@ const TransactionModal = ({
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
 
-    const newValue =
-      type === "file"
-      ? files[0]
-      : value;
+    const newValue = type === "file" ? files[0] : value;
 
     setFormState((prevState) => ({
       ...prevState,
-      [name]: newValue
+      [name]: newValue,
     }));
   };
 
   const handleUpdate = (status) => {
     const token = window.sessionStorage.getItem("token");
-      const headers = {
-        Authorization: `Bearer ${token}`
-      };
-  
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
 
-      const body = new FormData();
-      body.append("status", status)
+    const body = new FormData();
+    body.append("status", status);
 
+    console.log(body);
+    setIsLoading(true);
 
-      console.log(body)
-      setIsLoading(true)
-  
-      axios.patch(`${import.meta.env.VITE_API_URL}/transactions/${data?._id}`, body, { headers })
+    axios
+      .patch(
+        `${import.meta.env.VITE_API_URL}/transactions/${data?._id}`,
+        body,
+        { headers }
+      )
       .then((response) => {
-        if(response.data.success){
-          setIsLoading(false)
+        if (response.data.success) {
+          setIsLoading(false);
           openNotification(
             "topRight",
             "success",
             "Transaction updated successfully",
             "Transaction status has been updated successfully."
           );
-  
+
           setTimeout(() => {
             window.location.reload();
           }, 1000);
         }
-        
       })
       .catch((error) => {
         setIsLoading(false);
-  
+
         openNotification(
           "topRight",
           "error",
           "Error",
-          'An error occurred while updating the transaction.'
+          "An error occurred while updating the transaction."
         );
         console.error(error);
-      })
-  
-    }
+      });
+  };
 
   return (
     <>
@@ -195,12 +191,20 @@ const TransactionModal = ({
         {mode === "view" ? (
           <div className="card-body table-responsive p-4">
             <table className="table table-bordered">
-            <tr>
+              <tr>
                 <td>Status</td>
                 <td>
-                <span className={`badge ${data?.status === "approved" ? "badge-success" : data?.status === "pending" ? "badge-warning" : "badge-danger"}`}>
-                                                {capitalizeFirstLetter(data?.status)}
-                                            </span>
+                  <span
+                    className={`badge ${
+                      data?.status === "approved"
+                        ? "badge-success"
+                        : data?.status === "pending"
+                        ? "badge-warning"
+                        : "badge-danger"
+                    }`}
+                  >
+                    {capitalizeFirstLetter(data?.status)}
+                  </span>
                 </td>
               </tr>
               <tr>
@@ -209,13 +213,16 @@ const TransactionModal = ({
               </tr>
               <tr>
                 <td>Payment By</td>
-                <td>{data?.clientId?.userId?.firstname} {data?.clientId?.userId?.surname}</td>
+                <td>
+                  {data?.clientId?.userId?.firstname}{" "}
+                  {data?.clientId?.userId?.surname}
+                </td>
               </tr>
               <tr>
                 <td>Payment For</td>
                 <td>{capitalizeFirstLetter(data?.transactionType)}</td>
               </tr>
-              
+
               <tr>
                 <td>Payment Method</td>
                 <td>{data?.paymentMethod}</td>
@@ -225,35 +232,36 @@ const TransactionModal = ({
                 <td>GHS {formatCurrency(data?.amount)}</td>
               </tr>
 
-              {data?.paymentProof && (
-                              <tr>
-                              <td>Payment Proof</td>
-                              <td>
-                                <a target="_blank" href={data?.paymentProof}>
-                                  View Payment Proof
-                                </a>
-                              </td>
-                            </tr>
-                            )}
               <tr>
                 <td>Notes</td>
                 <td>{data?.notes || "No notes"}</td>
               </tr>
+
+              
+                <tr>
+                  <td>Payment Proof</td>
+                  <td>
+                    {data?.paymentProof ? (
+                    <a target="_blank" href={data?.paymentProof}>
+                      View Payment Proof
+                    </a>
+                      ) : (
+                      "No payment proof"
+                      )}
+                  </td>
+                </tr>
+            
+             
               <tr>
                 <td>Paid On</td>
                 <td>
-                <div>
-                                            {formatDate(data?.createdAt)}
-                                                </div>
-                                                <div>
-                                            {formatTime(data?.createdAt)}
-                                                </div>
+                  <div>{formatDate(data?.createdAt)}</div>
+                  <div>{formatTime(data?.createdAt)}</div>
                 </td>
               </tr>
             </table>
 
-
-            {data?.status === "pending" && (
+            {/* {data?.status === "pending" && (
                 <div className="card-footer">
                 <div className="row">
                   <div className="col-sm-6">
@@ -268,7 +276,7 @@ const TransactionModal = ({
                   </div>
                 </div>
                 </div>
-              )}
+              )} */}
           </div>
         ) : (
           <>
@@ -290,9 +298,10 @@ const TransactionModal = ({
                           >
                             <option value="">Select client</option>
                             {clients?.map((client) => (
-                                <option key={client?._id} value={client?._id}>
-                                    {client?.userId?.firstname} {client?.userId?.surname}
-                                </option>
+                              <option key={client?._id} value={client?._id}>
+                                {client?.userId?.firstname}{" "}
+                                {client?.userId?.surname}
+                              </option>
                             ))}
                           </select>
                         </div>
@@ -310,7 +319,6 @@ const TransactionModal = ({
                             onChange={handleInputChange}
                             type="number"
                             placeholder="Enter amount"
-                            
                           />
                         </div>
                       </div>
@@ -351,7 +359,6 @@ const TransactionModal = ({
                             <option value="Bank Transfer">Bank Transfer</option>
                           </select>
                         </div>
-
                       </div>
 
                       <div className="row mt-3">
@@ -360,16 +367,17 @@ const TransactionModal = ({
                             Notes{" "}
                           </label>
 
-                          <textarea className="form-control" name="notes" onChange={handleInputChange} id="" rows={5} cols={5}>
-
-                    </textarea>
+                          <textarea
+                            className="form-control"
+                            name="notes"
+                            onChange={handleInputChange}
+                            id=""
+                            rows={5}
+                            cols={5}
+                          ></textarea>
                         </div>
-
-                       
-
                       </div>
 
-                      
                       <div className="row mt-5 w-full">
                         <div className="col-lg-12">
                           <label className="form-label required">

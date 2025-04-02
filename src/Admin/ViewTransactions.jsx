@@ -5,15 +5,20 @@ import AdminSidebar from "./components/AdminSidebar";
 import AdminHeader from "./components/AdminHeader";
 import AdminFooter from "./components/AdminFooter";
 import TransactionModal from "./TransactionModal";
-// import axios from "axios";
+import axios from "axios";
 import { Spin } from "antd";
 
 const ViewTransactions = () => {
     const navigate = useNavigate();
+    const [results, setResults] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [countries, setCountries] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
+    const [count, setCount] = useState(0);
+    const [clients, setClients] = useState([]);
 
 
     const data = [{
@@ -32,11 +37,45 @@ const ViewTransactions = () => {
 
     const token = window.sessionStorage.getItem("token");
 
-    // if (!token) {
-    //   navigate("/");
-    //   return;
-    // }
-    setIsLoading(false);
+    if (!token) {
+        navigate("/");
+        return;
+      }
+
+  const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      axios
+      .get(`${import.meta.env.VITE_API_URL}/clients`, { headers })
+      .then((response) => {
+        // console.log(response.data);
+        const sortedOfficers = response.data.clients.sort(
+          (a, b) => new Date(b.userId.createdAt) - new Date(a.userId.createdAt)
+        );
+        setClients(sortedOfficers);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  
+      axios
+        .get(`${import.meta.env.VITE_API_URL}/transactions`, { headers })
+        .then((response) => {
+          // console.log(response.data);
+          const sortedOfficers = response.data.transactions.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+          setResults(sortedOfficers);
+          setCount(response.data.count);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setIsLoading(false);
+        });
+
   }, [navigate]);
 
 
@@ -45,8 +84,10 @@ const ViewTransactions = () => {
     setCurrentPage(1);
   };
 
-  const filteredData = data.filter((dati) =>
-    dati.paymentBy.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = results.filter((result) =>
+    result?.transactionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  result?.clientId?.userId?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  result?.clientId?.userId?.surname.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Calculate pagination
@@ -68,6 +109,46 @@ const ViewTransactions = () => {
 
 
 
+  const capitalizeFirstLetter = (word) => {
+    if (typeof word !== "string" || word.length === 0) {
+      return ""; // Handle invalid input
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  };
+
+
+  const formatDate = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return date.toLocaleDateString("en-US", options);
+  };
+
+  const formatTime = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const amPM = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12 || 12;
+    hours = hours.toString().padStart(2, "0");
+
+    return `${hours}:${minutes} ${amPM}`;
+  };
+
+  const formatCurrency = (value) => {
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+      return "Invalid number";
+    }
+
+    return number.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+
   return (
     <div className="hold-transition sidebar-mini">
       <div className="wrapper">
@@ -82,10 +163,13 @@ const ViewTransactions = () => {
         <div className="content-header">
             <div className="container-fluid">
                 <div className="row mb-2">
-                    <div className="col-sm-6">
+                    <div className="col-sm-4">
                         <h1 className="m-0">Transactions</h1>
                     </div>
-                    <div className="col-sm-6">
+                    <div className="col-sm-4">
+                      <h5 className="p-0 m-auto">Total Transactions: {count} </h5>
+                    </div>
+                    <div className="col-sm-4">
                         <ol className="breadcrumb float-sm-right">
                             <li className="breadcrumb-item"><a href="/">Dashboard</a></li>
                             <li className="breadcrumb-item active">Transactions</li>
@@ -100,13 +184,19 @@ const ViewTransactions = () => {
         <div className="content">
             <div className="container-fluid">
                 <div className="row">
-                    <div className="col-12">
+                    <div className="col-lg-12">
                         <div className="card">
                             <div className="card-header">
                                 <div className="row align-items-center">
-                                    <div className="col-12 d-flex justify-content-between">
+                                    <div className="col-6 d-flex justify-content-between">
                                         <h3 className="card-title">Manage Transactions </h3>
                                     </div>
+                                    <div className="col-6">
+                          <div className="float-right">
+                          <TransactionModal title={"Add New"} claxx={"btn btn-success btn-sm"} icon={"nav-icon fa fa-plus mr-2"} mode={"create"} buttonText={"Add New"} setIsLoading={setIsLoading} clients={clients} />
+
+                          </div>
+                        </div>
                                 </div>
                             </div>
 
@@ -148,15 +238,13 @@ const ViewTransactions = () => {
                                 <table id="dataTables" className="table table-hover text-nowrap jsgrid-table">
                                     <thead>
                                         <tr className="text-center">
-                                            <th >#</th>
-                                            <th >Date</th>
                                             <th >Transaction ID</th>
-                                            <th >Order ID</th>
                                             <th >Payment By</th>
-                                            <th >Type</th>
+                                            <th >Transaction Type</th>
                                             <th >Payment Method</th>
                                             <th >Amount</th>
-                                            <th >Country</th>
+                                            <th >Status</th>
+                                            <th >Paid On</th>
                                             <th >Action</th>
                                         </tr>
                                     </thead>
@@ -165,28 +253,46 @@ const ViewTransactions = () => {
                                     {currentPageData.length === 0 ? (
                                 <tr colspan="10" className="text-center">
                                   <td colspan="10">
-                                    No matching records found
+                                    No data found
                                   </td>
                                 </tr>
                               ) : (
-                                currentPageData.map((data, index) => (
-                                        <tr className="text-center">
-                                            <td>1</td>
-                                            <td>11 Jun 24</td>
-                                            <td>66682afd028ee</td>
-                                            <td>1</td>
-                                            <td>Shyamoli Dean</td>
+                                currentPageData.map((result, index) => (
+                                        <tr key={index} className="text-center">
+                                            <td>{result?.transactionId}</td>
+                                            <td>
+                                            <div>
+                                                {result?.clientId?.userId?.firstname} {result?.clientId?.userId?.surname}
+                                                </div>
+                                                <div>
+                                                {result?.clientId?.clientId}
+                                                </div>
+                                            </td>
+                                            <td>{capitalizeFirstLetter(result?.transactionType)}</td>
+                                            <td>{result?.paymentMethod}</td>
+                                            <td>GHS {formatCurrency(result?.amount)}</td>
 
-                                            <td>In</td>
-                                            <td className="">Bonus</td>
-                                            <td className="">1.00 INR</td>
-                                            <td>India</td>
                                             <td>
-                                            <TransactionModal title={"View"} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} mode={"view"} data={data} buttonText={"View"} />
+                                            <span className={`badge ${result?.status === "approved" ? "badge-success" : result?.status === "pending" ? "badge-warning" : "badge-danger"}`}>
+                                                {capitalizeFirstLetter(result?.status)}
+                                            </span>
+                                           
                                             </td>
                                             <td>
-                                            <TransactionModal title={"Update"} claxx={"btn btn-sm btn-warning mr-3"} icon={"nav-icon fa fa-edit mr-2"} mode={"edit"} data={data} buttonText={"Update"} />
+                                            <div>
+                                            {formatDate(result?.createdAt)}
+                                                </div>
+                                                <div>
+                                            {formatTime(result?.createdAt)}
+                                                </div>
+                                               
                                             </td>
+                                            <td>
+                                            <TransactionModal title={"View"} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} mode={"view"} data={result} buttonText={"View"} setIsLoading={setIsLoading} formatDate={formatDate} formatTime={formatTime} formatCurrency={formatCurrency} capitalizeFirstLetter={capitalizeFirstLetter} />
+                                            </td>
+                                            {/* <td>
+                                            <TransactionModal title={"Update"} claxx={"btn btn-sm btn-warning mr-3"} icon={"nav-icon fa fa-edit mr-2"} mode={"update"} data={data} buttonText={"Update"} setIsLoading={setIsLoading} />
+                                            </td> */}
                                         </tr>
                                          ))
                               )}

@@ -275,15 +275,6 @@ const LoanModal = ({ data, mode, claxx, icon, title, buttonText, setIsLoading, f
                               <td>{capitalizeFirstLetter(data?.existingLoan) || "False"}</td>
                             </tr>
 
-                            <tr>
-                              <td>Loan Officer ID</td>
-                              <td>{data?.assignedOfficer?.officerId}</td>
-                            </tr>
-
-                            <tr>
-                              <td>Loan Officer name</td>
-                              <td>{data?.assignedOfficer?.userId?.firstname} {data?.assignedOfficer?.userId?.surname}</td>
-                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -365,26 +356,7 @@ const LoanModal = ({ data, mode, claxx, icon, title, buttonText, setIsLoading, f
                 </div>
               </div>
             </div>
-
-              {data?.status === "pending" && (
-                <div className="card-footer">
-                <div className="row">
-                  <div className="col-sm-6">
-                    <button className="btn btn-success btn-sm btn-block" type="button" onClick={(() => {handleUpdate('approved')})}>
-                      Approve
-                    </button>
-                  </div>
-                  <div className="col-sm-6">
-                    <button className="btn btn-danger btn-sm btn-block" type="button" onClick={(() => {handleUpdate('denied')})}>
-                      Reject
-                    </button>
-                  </div>
-                </div>
-                </div>
-              )}
             
-            
-
           </>
         ) : (
           <>

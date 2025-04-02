@@ -15,8 +15,9 @@ const ClientModal = ({
   setIsLoading,
   formatDate,
   capitalizeFirstLetter,
-  officers
+  officer
 }) => {
+  // console.log(officer)
   const [open, setOpen] = useState(false);
   const [formState, setFormState] = useState({
     firstname: "",
@@ -41,7 +42,7 @@ const ClientModal = ({
     idFront: "",
     idBack: "",
     status: "active",
-    assignedOfficer: ""
+    assignedOfficer: officer
   });
 
 
@@ -53,8 +54,7 @@ const ClientModal = ({
       // console.log(data)
 
       const { firstname, surname, nationality, contact, profilePicture, ...rext } = data?.userId
-      const assignedOfficerId = data?.assignedOfficer?._id || "";
-      const { userId, assignedOfficer, ...rest } = data;
+      const { userId, ...rest } = data;
       
       setFormState(prev => ({
         ...prev,
@@ -64,7 +64,6 @@ const ClientModal = ({
         surname,
         nationality,
         contact: contact ? contact : "",
-        assignedOfficer: assignedOfficerId,
         profilePicture: profilePicture || prev.profilePicture
       }));
 
@@ -107,23 +106,22 @@ const ClientModal = ({
   
     if (mode === "create") {
       const nonRequiredFields = ["emergencyContact"];
+      // console.log(formState)
 
-      if (
-        Object.entries(formState).some(
-          ([key, value]) => 
-            !nonRequiredFields.includes(key) &&
-            !value?.toString().trim()
-        )
-      ) {
-        openNotification(
-          "topRight",
-          "error",
-          "Error",
-          "Please fill in all required fields"
-        );
-        setIsLoading(false); 
-        return;
-      }
+      // if (
+      //   Object.entries(formState).some(
+      //     ([key, value]) =>  !nonRequiredFields.includes(key) && !value?.toString().trim()
+      //   )
+      // ) {
+      //   openNotification(
+      //     "topRight",
+      //     "error",
+      //     "Error",
+      //     "Please fill in all required fields"
+      //   );
+      //   setIsLoading(false); 
+      //   return;
+      // }
 
 
       const body = new FormData();
@@ -132,7 +130,8 @@ const ClientModal = ({
       }
 
 
-      // console.log(formState);
+      // console.log(body);
+
       axios.post(`${import.meta.env.VITE_API_URL}/clients`, body, { headers })
       .then((response) => {
         if (response.data.success) {
@@ -261,7 +260,7 @@ const ClientModal = ({
 
             <div className="card-footer">
               <div className="row">
-                <div className="col-sm-4 border-right">
+                <div className="col-sm-6 border-right">
                   <div className="description-block">
                     <h5 className="description-header">Status</h5>
                     <span className="description-text">
@@ -276,13 +275,8 @@ const ClientModal = ({
                     </span>
                   </div>
                 </div>
-                <div className="col-sm-4 border-right">
-                  <div className="description-block">
-                    <h5 className="description-header">Assigned Officer</h5>
-                    <span className="description-text">{`${data?.assignedOfficer?.userId?.firstname} ${data?.assignedOfficer?.userId?.surname}` || "No assigned officer"}</span>
-                  </div>
-                </div>
-                <div className="col-sm-4">
+                
+                <div className="col-sm-6">
                   <div className="description-block">
                     <h5 className="description-header">Registered At</h5>
                     <span className="description-text">{formatDate(data?.userId?.createdAt)}</span>
@@ -704,29 +698,7 @@ const ClientModal = ({
                       </div>
                     </div>
 
-                    <div className="row mt-2">
-                   
-                      <div className="col-md-12">
-                        <label className="form-label required" for="last_name">
-                           Assigned Officer <span className="text-danger">*</span>
-                        </label>
-                        
-
-                          <select 
-                            className="form-control"
-                            name="assignedOfficer"
-                            value={formState.assignedOfficer || ""}
-                            onChange={(e) => setFormState(prev => ({ ...prev, assignedOfficer: e.target.value }))}
-                        >
-                            <option value="">Select assigned officer</option>
-                            {officers?.map((officer) => (
-                                <option key={officer?._id} value={officer?._id} selected={officer._id === formState?.assignedOfficer}>
-                                    {officer?.userId?.firstname} {officer?.userId?.surname}
-                                </option>
-                            ))}
-                        </select>
-                      </div>
-                    </div>
+                
                   </fieldset>
 
 {mode === 'create' && (<>

@@ -5,41 +5,85 @@ import AdminSidebar from "./components/AdminSidebar";
 import AdminHeader from "./components/AdminHeader";
 import AdminFooter from "./components/AdminFooter";
 import LoanModal from "./LoanModal";
+import axios from "axios";
 
 import { Spin } from "antd";
 
 
 const ViewLoans = () => {
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
+    const [results, setResults] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [countries, setCountries] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
+    const [clients, setClients] = useState([]);
+    const [count, setCount] = useState(0)
 
-    const data = [{}]
 
   useEffect(() => {
     document.title = "View Loans | MicroHub";
 
-    // setIsLoading(true);
+    setIsLoading(true);
 
-    // const token = window.sessionStorage.getItem("token");
+    const token = window.sessionStorage.getItem("token");
 
-    // if (!token) {
-    //   navigate("/");
-    //   return;
-    // }
+    if (!token) {
+        navigate("/");
+        return;
+      }
 
-    // setIsLoading(false);
+  const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
 
-  }, []);
+
+
+      axios
+      .get(`${import.meta.env.VITE_API_URL}/clients`, { headers })
+      .then((response) => {
+        // console.log(response.data);
+        const sortedOfficers = response.data.clients.sort(
+          (a, b) => new Date(b.userId.createdAt) - new Date(a.userId.createdAt)
+        );
+        setClients(sortedOfficers);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+
+  
+      axios
+        .get(`${import.meta.env.VITE_API_URL}/loans`, { headers })
+        .then((response) => {
+          // console.log(response.data);
+          const sortedOfficers = response.data.loans.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+          setResults(sortedOfficers);
+          setCount(response.data.count);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setIsLoading(false);
+        });
+  }, [navigate]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
   };
 
-  const filteredData = data
+  const filteredData = results.filter((result) =>
+    result?.loanId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  result?.clientId?.userId?.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  result?.clientId?.userId?.surname.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Calculate pagination
   const totalItems = filteredData.length;
@@ -58,6 +102,45 @@ const ViewLoans = () => {
     setCurrentPage(pageNumber);
   };
 
+  const capitalizeFirstLetter = (word) => {
+    if (typeof word !== "string" || word.length === 0) {
+      return ""; // Handle invalid input
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  };
+
+
+  const formatDate = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return date.toLocaleDateString("en-US", options);
+  };
+
+  const formatTime = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const amPM = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12 || 12;
+    hours = hours.toString().padStart(2, "0");
+
+    return `${hours}:${minutes} ${amPM}`;
+  };
+
+  const formatCurrency = (value) => {
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+      return "Invalid number";
+    }
+
+    return number.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
 
   return (
     <div className="hold-transition sidebar-mini">
@@ -73,10 +156,13 @@ const ViewLoans = () => {
           <div className="content-header">
             <div className="container-fluid">
               <div className="row mb-2">
-                <div className="col-sm-6">
+                <div className="col-sm-4">
                   <h1 className="m-0">Loans</h1>
                 </div>
-                <div className="col-sm-6">
+                <div className="col-sm-4">
+                  <h5 className="p-0 m-auto">Total Requests: {count} </h5>
+                </div>
+                <div className="col-sm-4">
                   <ol className="breadcrumb float-sm-right">
                     <li className="breadcrumb-item">
                       <a href="admin.dashboard">Dashboard</a>
@@ -96,11 +182,12 @@ const ViewLoans = () => {
                     <div className="card-header">
                       <div className="row align-items-center">
                         <div className="col-6">
-                          <h3 className="card-title">Loans List</h3>
+                          <h3 className="card-title">Loan Requests</h3>
                         </div>
+                      
                         <div className="col-6">
                           <div className="float-right">
-                             <LoanModal title={"Create"} claxx={"btn btn-success btn-sm"} icon={"nav-icon fa fa-plus mr-2"} mode={"create"} buttonText={"Add New"} setIsLoading={setIsLoading} />
+                             <LoanModal title={"Create"} claxx={"btn btn-success btn-sm"} icon={"nav-icon fa fa-plus mr-2"} mode={"create"} buttonText={"Add New"} setIsLoading={setIsLoading} clients={clients} />
                           </div>
                         </div>
                       </div>
@@ -117,9 +204,7 @@ const ViewLoans = () => {
                                   setItemsPerPage(e.target.value);
                                 }}
                               >
-                                <option value="10" selected>
-                                  10
-                                </option>
+                                <option value="10" selected>10</option>
                                 <option value="25">25</option>
                                 <option value="50">50</option>
                                 <option value="100">100</option>
@@ -152,39 +237,83 @@ const ViewLoans = () => {
                             <th>Officer Info</th>
                             <th>Total Amount</th>
                             <th>Issued Date</th>
-                            <th className="text-center">Payment Status</th>
-                            <th className="text-center">Action</th>
+                            <th>Loan Status</th>
+                            <th>Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                        <input type="hidden" value={currentPageData} />
-                          <tr>
-                            <td>64d4d5afe8b2f</td>
-                            <td>
-                              <div>John Doe</div>
-                              <div>@JohnDoe</div>
-                        
-                            </td>
+                        {currentPageData.length === 0 ? (
+                                   <tr>
+                                   <td className="w-full px-3 py-4 text-center text-black" colSpan="7">No data</td>
+                                 </tr>
+                                 ) : (
+                                   currentPageData.map((result, key) => {
+                                     return(
+                                        <tr key={key}>
+                                          <td><div className="float-left p-2">
+                                            {result?.loanId}
+                                            
+                                        </div>
+                                    </td>
+                                            
+                                    <td>
+                                                <div>
+                                                {result?.clientId?.userId?.firstname} {result?.clientId?.userId?.surname}
+                                                </div>
+                                                <div>
+                                                {result?.clientId?.clientId}
+                                                </div>
 
-                            <td>
-                              <div>Dennis Lloyd</div>
-                              <div>@dennislloy</div>
-                            </td>
+                                            </td>
+                                            
+                                            <td>
+                                                <div>
+                                                {result?.assignedOfficer?.userId?.firstname} {result?.assignedOfficer?.userId?.surname}
+                                                </div>
+                                                <div>
+                                                {result?.assignedOfficer?.officerId}
+                                                </div>
 
-                            <td>
-                              <div>GHS 2000</div>
-                            </td>
+                                            </td>
+                                          
 
-                            <td>25th March, 2024</td>
+                                              <td>
+                                              GHS {formatCurrency(result?.totalAmount || 0) || 0.00}
+                                            </td>
+                                            
 
-                            <td className="text-center">
-                              <span className="badge badge-warning">Pending</span>
-                            </td>
+                                            <td>
+                                            <div>
+                                            {formatDate(result?.createdAt)}
+                                                </div>
+                                                <div>
+                                            {formatTime(result?.createdAt)}
+                                                </div>
+                                               
+                                              
+                                              </td>
 
-                            <td className="text-center">
-                            <LoanModal title={"View"} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} mode={"view"} data={data} buttonText={"View"} />
-                            </td>
-                          </tr>
+                                              <td className="text-muted">
+                                            
+                                            <span className={`badge ${result?.status === "approved" ? "badge-success" : result?.status === "pending" ? "badge-warning" : "badge-danger"}`}>
+                                                {capitalizeFirstLetter(result?.status)}
+                                            </span>
+                                           
+                                        </td>
+
+                                            <td>
+
+                                                {/* <ClientModal title={"Add Credit"} claxx={"btn btn-sm btn-secondary mr-3"} icon={"nav-icon fa fa-money-bill mr-2"} mode={"credit"} buttonText={"Add Credit"} /> */}
+
+                                           
+                                                <LoanModal title={"View"} claxx={"btn btn-sm btn-info mr-3"} icon={"nav-icon fa fa-eye mr-2"} data={result} mode={"view"} setIsLoading={setIsLoading} formatCurrency={formatCurrency} buttonText={"View"} formatDate={formatDate} capitalizeFirstLetter={capitalizeFirstLetter} />
+                                               
+                                            </td>
+                                        </tr>
+                                    )})
+                           )}
+
+
                         </tbody>
                       </table>
                     </div>

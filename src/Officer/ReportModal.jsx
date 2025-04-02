@@ -40,131 +40,62 @@ const ReportModal = ({ data, mode, claxx, icon, title, buttonText, setIsLoading,
       "Content-Type": "multipart/form-data",
     };
 
-    setIsLoading(true);
-
-    const body = new FormData();
-    for (const key in formState) {
-      body.append(key, formState[key]);
-    }
+ 
 
     if (mode === "create") {
-      if (Object.values(formState).some((value) => !value)) {
+      const nonRequiredFields = ["supportingDocument"];
+      // console.log(formState)
+
+      if (
+        Object.entries(formState).some(
+          ([key, value]) =>
+            !nonRequiredFields.includes(key) && !value?.toString().trim()
+        )
+      ) {
         openNotification(
           "topRight",
           "error",
-          "Error",
-          "All fields are required."
+          "Missing Information",
+          "Please fill in all required fields"
         );
         return;
       }
 
-      axios
-        .post(`${process.env.REACT_APP_API_URL}/auth/sign-up`, body, {
-          headers,
-        })
-        .then((response) => {
-          openNotification(
-            "topRight",
-            "success",
-            "Loan created successfully",
-            "Loan has been created successfully."
-          );
+      setIsLoading(true);
 
-          setTimeout(() => {
-            window.location.href = `/admin/loans`;
-          }, 1000);
-        })
-        .catch((error) => {
-          openNotification(
-            "topRight",
-            "error",
-            "Error",
-            "An error occurred while creating the loan."
-          );
-          console.error(error);
-          setIsLoading(false);
-        })
-        .finally(() => {
-          setOpen(false);
-        });
-    } else {
-      console.log(body);
-
-      axios
-        .patch(`${process.env.REACT_APP_API_URL}/loans/${data?.id}`, body, {
-          headers,
-        })
-        .then((response) => {
-          openNotification(
-            "topRight",
-            "success",
-            "Loan updated successfully",
-            "Loan details has been updated successfully."
-          );
-
-          setTimeout(() => {
-            window.location.href = `/admin/loans`;
-          }, 1000);
-        })
-        .catch((error) => {
-          openNotification(
-            "topRight",
-            "error",
-            "Error",
-            "An error occurred while updating the loan."
-          );
-          console.error(error);
-          setIsLoading(false);
-        })
-        .finally(() => {
-          setOpen(false);
-        });
-    }
-  };
-
-  const handleUpdate = (status) => {
-    const token = window.sessionStorage.getItem("token");
-      const headers = {
-        Authorization: `Bearer ${token}`
-      };
-  
-      const body = {
-        "status": status, 
+      const body = new FormData();
+      for (const key in formState) {
+        body.append(key, formState[key]);
       }
-  
-      // console.log(body)
-      setIsLoading(true)
-  
-      axios.patch(`${import.meta.env.VITE_API_URL}/reports/${data?._id}`, body, { headers })
-      .then((response) => {
-        if(response.data.success){
-          setIsLoading(false)
+
+      axios
+        .post(`${import.meta.env.VITE_API_URL}/reports`, body, {
+          headers,
+        })
+        .then((response) => {
           openNotification(
             "topRight",
             "success",
-            "Report updated successfully",
-            "Report status has been updated successfully."
+            "Report created successfully",
+            "Report has been created successfully."
           );
-  
+
           setTimeout(() => {
             window.location.reload();
           }, 1000);
-        }
-        
-      })
-      .catch((error) => {
-        setIsLoading(false);
-  
-        openNotification(
-          "topRight",
-          "error",
-          "Error",
-          'An error occurred while updating the report.'
-        );
-        console.error(error);
-      })
-  
-    }
+        })
+        .catch((error) => {
+          openNotification(
+            "topRight",
+            "error",
+            "Error",
+            "An error occurred while creating the report."
+          );
+          console.error(error);
+          setIsLoading(false);
+        })
+    } 
+  };
 
   const handleCancel = () => {
     setOpen(false);
@@ -230,18 +161,7 @@ const ReportModal = ({ data, mode, claxx, icon, title, buttonText, setIsLoading,
                   <td width="20%">Report ID</td>
                   <td width="80%">{data?.reportId}</td>
               </tr>
-              <tr>
-                  <td>Submitted By</td>
-                  <td>
-                  <div>
-                                        {data?.submittedBy?.userId?.firstname}{" "}
-                                        {data?.submittedBy?.userId?.surname}
-                                      </div>
-                                      <div>
-                                        {data?.submittedBy?.officerId}
-                                      </div>
-                  </td>
-              </tr>
+              
               <tr>
                   <td>Submitted On</td>
                   <td>
@@ -276,25 +196,8 @@ const ReportModal = ({ data, mode, claxx, icon, title, buttonText, setIsLoading,
                                             
                                         </td>
                                     </tr>
-            
           </table>
 
-          {data?.status === "pending" && (
-                <div className="card-footer">
-                <div className="row">
-                  <div className="col-sm-6">
-                    <button className="btn btn-success btn-sm btn-block" type="button" onClick={(() => {handleUpdate('approved')})}>
-                      Approve
-                    </button>
-                  </div>
-                  <div className="col-sm-6">
-                    <button className="btn btn-danger btn-sm btn-block" type="button" onClick={(() => {handleUpdate('denied')})}>
-                      Reject
-                    </button>
-                  </div>
-                </div>
-                </div>
-              )}
             
       </div>
         ) : (

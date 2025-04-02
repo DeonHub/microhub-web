@@ -9,14 +9,14 @@ import { Spin } from "antd";
 import Charts from "./components/Charts";
 
 
-const Dashboard = () =>{
+const OfficerDashboard = () =>{
 
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 const [results, setResults] = useState([]);
 
   useEffect(() => {
-    document.title = "Dashboard | MicroHub";
+    document.title = "Officer Dashboard | MicroHub";
 
     setIsLoading(true);
 
@@ -34,10 +34,8 @@ const [results, setResults] = useState([]);
 
   
       axios
-        .get(`${import.meta.env.VITE_API_URL}/dashboard/admin`, { headers })
+        .get(`${import.meta.env.VITE_API_URL}/dashboard/officer`, { headers })
         .then((response) => {
-        //   console.log(response.data);
- 
           setResults(response.data.data);
           setIsLoading(false);
         })
@@ -79,20 +77,10 @@ const [results, setResults] = useState([]);
                 <div className="content">
                     <div className="container-fluid">
                         <div className="row">
-                            <div className="col-12 col-sm-6 col-md-3">
-                            <a href="/admin/officers" className="stretched-link">
-                                <div className="info-box link_color">
-                                    <div className="info-box-content">
-                                        <span className="info-box-text">Total Officers</span>
-                                        <span className="info-box-number">{results?.totalOfficers || 0}</span>
-                                    </div>
-                                    
-                                </div>
-                                </a>
-                            </div>
+                            
             
                             <div className="col-12 col-sm-6 col-md-3">
-                            <a href="/admin/clients" className="stretched-link">
+                            <a href="/officer/clients" className="stretched-link">
                                 <div className="info-box link_color">
                                     <div className="info-box-content">
                                         <span className="info-box-text">Total Clients</span>
@@ -103,7 +91,7 @@ const [results, setResults] = useState([]);
                             </div>
             
                             <div className="col-12 col-sm-6 col-md-3">
-                            <a href="/admin/loans" className="stretched-link">
+                            <a href="/officer/loans" className="stretched-link">
                                 <div className="info-box link_color">
                                     <div className="info-box-content">
                                         <span className="info-box-text">Total Loans</span>
@@ -116,7 +104,7 @@ const [results, setResults] = useState([]);
             
                             
                             <div className="col-12 col-sm-6 col-md-3">
-                            <a href="/admin/transactions" className="stretched-link">
+                            <a href="/officer/transactions" className="stretched-link">
                                 <div className="info-box link_color">
                                     <div className="info-box-content">
                                         <span className="info-box-text">Total Transactions</span>
@@ -129,7 +117,7 @@ const [results, setResults] = useState([]);
                         
 
                             <div className="col-12 col-sm-6 col-md-3">
-                            <a href="/admin/reports" className="stretched-link">
+                            <a href="/officer/reports" className="stretched-link">
                                 <div className="info-box link_color">
                                     <div className="info-box-content">
                                         <span className="info-box-text">Total Reports</span>
@@ -140,42 +128,7 @@ const [results, setResults] = useState([]);
                                 </a>
                             </div>
             
-                            <div className="col-12 col-sm-6 col-md-3">
-                            <a href="/admin/tickets" className="stretched-link">
-                                <div className="info-box link_color">
-                                    <div className="info-box-content">
-                                        <span className="info-box-text">Total Tickets</span>
-                                        <span className="info-box-number">{results?.totalTickets || 0}</span>
-                                    </div>
-                                </div>
-                                </a> 
-                            </div>
-            
-                            <div className="col-12 col-sm-6 col-md-3">
-                            <a href="/admin/loans" className="stretched-link">
-                                <div className="info-box link_color">
-                                    <div className="info-box-content">
-                                        <span className="info-box-text">Pending Loans</span>
-                                        <span className="info-box-number">{results?.pendingLoans || 0}</span>
-                                    </div>
-                                    {/* <a href="#" className="stretched-link">.</a> */}
-                                </div>
-                                </a>
-                            </div>
-            
-                            
-                            <div className="col-12 col-sm-6 col-md-3">
-                            <a href="/admin/transactions" className="stretched-link">
-                                <div className="info-box link_color">
-                                    <div className="info-box-content">
-                                        <span className="info-box-text">Pending Transactions</span>
-                                        <span className="info-box-number">{results?.pendingTransactions || 0}</span>
-                                    </div>
-                                    
-                                </div>
-                                </a>
-                            </div>
-            
+ 
                         </div>
             
             
@@ -195,4 +148,4 @@ const [results, setResults] = useState([]);
 }
 
 
-export default Dashboard;
+export default OfficerDashboard;

@@ -52,8 +52,8 @@ const AdminHeader = () => {
                             </span>
                         </span>
                         <div className="dropdown-menu dropdown-menu-md dropdown-menu-right">
-                            <a href="/admin/profile" className="dropdown-item">Profile & account</a>
-                            <a href="/admin/password-reset" className="dropdown-item">Password Reset</a>
+                            <a href="/officer/profile" className="dropdown-item">Profile & account</a>
+                            <a href="/officer/password-reset" className="dropdown-item">Password Reset</a>
                             <div className="dropdown-divider"></div>
                             <span href="/" style={{ cursor: "pointer" }} onClick={handleLogout} className="dropdown-item text-danger"
                                 >Logout

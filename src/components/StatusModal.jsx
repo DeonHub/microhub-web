@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Modal, Button } from "antd";
 import openNotification from "./OpenNotification";
-// import axios from "axios";
+import axios from "axios";
 
 const StatusModal = ({ title, content, claxx, noicon, setIsLoading, id, redirectUrl, status, role }) => {
   const [open, setOpen] = useState(false);
@@ -12,55 +12,46 @@ const StatusModal = ({ title, content, claxx, noicon, setIsLoading, id, redirect
   };
 
   const handleOk = () => {
+    
+    const token = window.sessionStorage.getItem("token");
+
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    };
+  
     setIsLoading(true);
 
-    // Fetch data from localStorage based on role
-    const storageKey = role === "client" ? "clientsData" : "officersData";
-    const existingData = JSON.parse(localStorage.getItem(storageKey)) || [];
+    const body = new FormData();
+    body.append("status", status === "active" ? "inactive" : "active");
 
-    // Find the client/user by id
-    const index = existingData.findIndex((item) => item.userId === id);
+    axios.patch(`${import.meta.env.VITE_API_URL}/${role === 'client' ? 'clients' : 'officers'}/${id}`, body, { headers })
+    .then((response) => {
+      // console.log(response);
 
-    if (index === -1) {
-      openNotification(
-        "topRight",
-        "error",
-        "Error",
-        `${role === "client" ? "Client" : "Officer"} not found.`
-      );
-      setIsLoading(false);
-      return;
-    }
+      if (response.data.success) {
+        setIsLoading(false);
+        openNotification(
+          "topRight",
+          "success",
+          `${role === "client" ? "Client" : "Officer"} updated successfully`,
+          `${role === "client" ? "Client" : "Officer"} status updated successfully.`
+        );
+        window.location.reload();
 
-    // Toggle the status
-    existingData[index].status = status === "active" ? "inactive" : "active";
+      }})
+      .catch((error) => {
+        openNotification(
+          "topRight",
+          "error",
+          "Error",
+          `Failed to update ${role === "client" ? "client" : "officer"} status.`
+        );
 
-    // Save updated data back to localStorage
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(existingData));
-      openNotification(
-        "topRight",
-        "success",
-        "Success",
-        `${role === "client" ? "Client" : "Officer"} status updated successfully.`
-      );
+        console.log("error >>", error)
+        setIsLoading(false);
+      });
 
-      // Redirect after a delay
-      setTimeout(() => {
-        window.location.href = `/admin/${redirectUrl}`;
-      }, 1000);
-    } catch (error) {
-      openNotification(
-        "topRight",
-        "error",
-        "Error",
-        `Failed to update ${role === "client" ? "client" : "user"} status.`
-      );
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-      setOpen(false);
-    }
   };
 
   const handleCancel = () => {

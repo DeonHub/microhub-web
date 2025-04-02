@@ -8,16 +8,15 @@ import ReportModal from "./ReportModal";
 import axios from "axios";
 import { Spin } from "antd";
 
-const ViewReports = () => {
+const OfficerReports = () => {
   const navigate = useNavigate();
   const [results, setResults] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [countries, setCountries] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [count, setCount] = useState(0);
+  const [userId, setUserId] = useState(window.sessionStorage.getItem("userId"))
 
   useEffect(() => {
     document.title = "View Reports | MicroHub";
@@ -36,7 +35,7 @@ const ViewReports = () => {
     };
 
     axios
-      .get(`${import.meta.env.VITE_API_URL}/reports`, { headers })
+      .get(`${import.meta.env.VITE_API_URL}/reports/officer/${userId}`, { headers })
       .then((response) => {
         // console.log(response.data);
         const sortedOfficers = response.data.reports.sort(
@@ -157,14 +156,14 @@ const ViewReports = () => {
                             </div>
                             <div className="col-6">
                               <div className="float-right">
-                                {/* <ReportModal
+                                <ReportModal
                                   title={"Add New"}
                                   claxx={"btn btn-success btn-sm"}
                                   icon={"nav-icon fa fa-plus mr-2"}
                                   mode={"create"}
                                   buttonText={"Add New"}
                                   setIsLoading={setIsLoading}
-                                /> */}
+                                />
                               </div>
                             </div>
                           </div>
@@ -212,7 +211,6 @@ const ViewReports = () => {
                             <thead>
                               <tr className="text-center">
                                 <th>Report ID</th>
-                                <th>Submitted By</th>
                                 <th>Report Type</th>
                                 <th>Submitted On</th>
                                 <th>Status</th>
@@ -231,16 +229,7 @@ const ViewReports = () => {
                                 currentPageData.map((result, index) => (
                                   <tr className="text-center" key={index}>
                                     <td>{result.reportId}</td>
-                                    <td>
-                                      <div>
-                                        {result?.submittedBy?.userId?.firstname}{" "}
-                                        {result?.submittedBy?.userId?.surname}
-                                      </div>
-                                      <div>
-                                        {result?.submittedBy?.officerId}
-                                      </div>
-                                    </td>
-
+                                   
                                     <td>
                                       {capitalizeFirstLetter(result.reportType)}{" "}
                                       Report
@@ -370,4 +359,4 @@ const ViewReports = () => {
   );
 };
 
-export default ViewReports;
+export default OfficerReports;
